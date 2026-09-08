@@ -1,0 +1,10 @@
+FICTIONAL DEMO — SERIOUS INCIDENT
+Reference: INC-DEMO-015
+Classification: Internal — Confidential
+Date: 2026-09-08 16:40
+Location: Press Shop, Plant 2, Line 3
+Asset: HP-800-03 hydraulic press
+
+During a die change, the ram moved unexpectedly while a worker’s hand was inside the guarded area. The worker suffered a serious crush injury and was taken to medical care. Emergency stop and LOTO were applied; the area was barricaded. Work Order WO-DEMO-8822 was marked Critical. The latest log recorded 171 bar accumulator pressure and a leaking Seal #4. The SOP requires stored hydraulic energy to be released and accumulator pressure below 5 bar before inspection. CCTV, permits, isolation records, and controller logs require investigation.
+
+Draft only. No restart or expenditure is authorized.

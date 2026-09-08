@@ -12,6 +12,7 @@ from backend.sandbox import run_isolated
 
 class Question(BaseModel):
     prompt:str=Field(min_length=1,max_length=800)
+    document_id:str|None=None
 class RunInput(BaseModel):
     document_id:str
     goal:str=Field(default='Summarize the inspection findings and draft a review approval note.',min_length=1,max_length=500)
@@ -42,6 +43,7 @@ def extractive_approval_note(evidence):
     else:
         finance=f"Cost information was not provided in the report {ref}. Financial approval cannot be completed until the responsible reviewer supplies and verifies it."
     references='\n'.join(f"[{e['ref']}] {e['filename']}, page {e['page']}" for e in evidence)
+    observations='\n'.join(f"- {e['text'].replace(chr(10),' ').strip()} [{e['ref']}]" for e in evidence)
     return '\n'.join([
         f"Subject: {subject}",
         "Background",background,
@@ -50,8 +52,39 @@ def extractive_approval_note(evidence):
         "Financial position",finance,
         "Decision requested",
         "Review the recorded finding and proposed action, confirm the responsible owner, and provide any required cost and authorization details. This draft does not authorize expenditure, maintenance or an operational conclusion.",
+        "Immediate reviewer next steps",
+        "1. Confirm the original report and the cited page evidence.\n2. Verify isolation, permit and site safety controls before any work.\n3. Assign an accountable owner and due date.\n4. Record cost, authorization and restart requirements before approval.",
+        "Recorded source observations",observations,
         "Source references",references,
     ])
+
+def grounded_evidence_brief(evidence, prompt):
+    """Readable deterministic answer used when model citations cannot be trusted."""
+    lines=[
+        "Evidence-grounded brief",
+        "The local model draft did not pass citation validation. The statements below are limited to the supplied source text and require human review.",
+        "",
+        "What the supplied sources state",
+    ]
+    for evidence_item in evidence:
+        text=' '.join(evidence_item['text'].split())
+        sentences=[part.strip() for part in re.split(r'(?<=[.!?])\s+',text) if part.strip()]
+        selected=' '.join(sentences[:3])[:650]
+        lines.append(f"- {selected} [{evidence_item['ref']}]")
+    lines.extend([
+        "",
+        "Required verification before action",
+        "- Confirm the original document, revision and page reference for each statement.",
+        "- Check the applicable site permit, isolation, gas-testing and emergency procedures with the responsible supervisor.",
+        "- Record the decision owner, due date, authorization and any missing measurements or cost information.",
+        "",
+        "Evidence limits",
+        "The supplied excerpts do not by themselves establish that an incident occurred, identify a root cause, or authorize work. Review the original files and applicable site rules before making an operational decision.",
+        "",
+        "Sources",
+        '\n'.join(f"[{item['ref']}] {item['filename']}, page {item['page']}" for item in evidence),
+    ])
+    return '\n'.join(lines)
 
 def install(app,database,identity,owned_workspace,engine,db_path,upload_dir):
     data=Path(db_path).parent;previews=data/'previews';artifacts=data/'artifacts';jobs_lock=Lock();extract_lock=Lock()
@@ -64,8 +97,11 @@ def install(app,database,identity,owned_workspace,engine,db_path,upload_dir):
         con.execute("UPDATE runs SET status='interrupted' WHERE status='running'")
     def owned_doc(document_id,user,write=False):
         with database() as con:
-            row=con.execute('SELECT d.*,w.owner_id FROM documents d JOIN workspaces w ON d.workspace_id=w.id WHERE d.id=?',(document_id,)).fetchone()
-        if row and row['owner_id']!=user['id'] and user['role']!='administrator' and not (user['role']=='supervisor' and not write):row=None
+            row=con.execute('''SELECT d.*,w.owner_id,COALESCE(m.kind,'report') AS kind,u.role AS owner_role
+                FROM documents d JOIN workspaces w ON d.workspace_id=w.id JOIN users u ON u.id=w.owner_id
+                LEFT JOIN document_metadata m ON m.document_id=d.id WHERE d.id=?''',(document_id,)).fetchone()
+        shared_reference=row and row['kind']=='reference' and row['owner_role']=='administrator'
+        if row and row['owner_id']!=user['id'] and not shared_reference and user['role']!='administrator' and not (user['role']=='supervisor' and not write):row=None
         if not row:raise HTTPException(404,'Document not found.')
         return dict(row)
     def read_doc(doc):
@@ -78,7 +114,11 @@ def install(app,database,identity,owned_workspace,engine,db_path,upload_dir):
         return pages
     def records(workspace):
         with database() as con:
-            return [dict(r) for r in con.execute('SELECT p.document_id,p.page,p.text,d.filename FROM pages p JOIN documents d ON p.document_id=d.id WHERE d.workspace_id=? ORDER BY d.created_at DESC,p.page LIMIT 400',(workspace,)).fetchall()]
+            return [dict(r) for r in con.execute('''SELECT p.document_id,p.page,p.text,d.filename
+                FROM pages p JOIN documents d ON p.document_id=d.id
+                JOIN workspaces w ON w.id=d.workspace_id LEFT JOIN document_metadata m ON m.document_id=d.id
+                WHERE d.workspace_id=? OR COALESCE(m.kind,'report')='reference' AND w.owner_id IN (SELECT id FROM users WHERE role='administrator')
+                ORDER BY CASE WHEN COALESCE(m.kind,'report')='reference' THEN 0 ELSE 1 END,d.created_at DESC,p.page LIMIT 600''',(workspace,)).fetchall()]
     def save_answer(workspace,prompt,result):
         ident=str(uuid.uuid4());now=int(time.time())
         with database() as con:con.execute('INSERT INTO generations VALUES (?,?,?,?,?)',(ident,workspace,prompt,json.dumps(result),now))
@@ -133,12 +173,31 @@ def install(app,database,identity,owned_workspace,engine,db_path,upload_dir):
         try:result=engine.generate(body.prompt,context=context_for(evidence))
         except (ModelUnavailable,ModelBusy) as exc:raise HTTPException(503,str(exc))
         if not evidence_check(result['answer'],evidence):
-            result['answer']='I could not produce a reliably cited synthesis. Relevant source excerpts are provided verbatim below:\n\n'+'\n\n'.join(f"[{e['ref']}] {e['text']}" for e in evidence)
+            result['answer']=grounded_evidence_brief(evidence,body.prompt)
             result['finish_reason']='stop'
             result['extractive_fallback']=True
         result['sources']=evidence;result['citation_format_valid']=evidence_check(result['answer'],evidence)
         result['review_note']='Source links identify retrieved evidence; review whether each claim is supported.'
-        return save_answer(workspace_id,body.prompt,result)
+        saved=save_answer(workspace_id,body.prompt,result)
+        report_id=None
+        with database() as con:
+            candidates=dict.fromkeys(([body.document_id] if body.document_id else [])+[item['document_id'] for item in evidence if item.get('document_id')])
+            for candidate in candidates:
+                kind=con.execute("SELECT COALESCE(m.kind,'report') FROM documents d LEFT JOIN document_metadata m ON m.document_id=d.id WHERE d.id=? AND d.workspace_id=?",(candidate,workspace_id)).fetchone()
+                if kind and kind[0]=='report':report_id=candidate;break
+        if report_id:
+            with database() as con:
+                report=con.execute('''SELECT d.id,d.workspace_id,COALESCE(m.kind,'report') AS kind
+                    FROM documents d LEFT JOIN document_metadata m ON m.document_id=d.id WHERE d.id=?''',(report_id,)).fetchone()
+                if report and report['workspace_id']==workspace_id and report['kind']=='report':
+                    run_id=str(uuid.uuid4());now=int(time.time());events=[{'time':now,'message':'Incident analysis completed in Assistant.'},{'time':now,'message':'Queued for Supervisor analysis and approval.'}]
+                    con.execute('INSERT INTO runs VALUES (?,?,?,?,?,?,?)',(run_id,workspace_id,'analysis','complete',json.dumps(events),json.dumps(result),now))
+                    review_id=str(uuid.uuid4());con.execute('''INSERT INTO review_requests
+                        (id,run_id,workspace_id,document_id,requester_id,status,reviewer_note,created_at)
+                        VALUES (?,?,?,?,?,'pending_analysis','',?)''',(review_id,run_id,workspace_id,report_id,identity_user['id'],now))
+                    con.execute('INSERT INTO audit_events(user_id,action,created_at) VALUES (?,?,?)',(identity_user['id'],'incident_analysis_queued_for_supervisor',now))
+                    saved['review_request_id']=review_id;saved['review_status']='pending_analysis'
+        return saved
 
     @app.post('/api/documents/{document_id}/vision',status_code=201)
     def vision(document_id:str,request:Request):
@@ -184,6 +243,12 @@ def install(app,database,identity,owned_workspace,engine,db_path,upload_dir):
             directory=artifacts/run;names=build_exports(directory,draft,evidence)
             links=[attach(run,workspace_id,directory/name) for name in names]
             update(run,'Created editable Word, Excel and PowerPoint files; human review remains required.','complete',{'draft':draft,'sources':evidence,'artifacts':links,'review_required':True})
+            with database() as con:
+                con.execute('''INSERT OR IGNORE INTO review_requests
+                    (id,run_id,workspace_id,document_id,requester_id,status,reviewer_note,created_at)
+                    VALUES (?,?,?,?,?,'pending_analysis','',?)''',
+                    (str(uuid.uuid4()),run,workspace_id,primary['id'],user['id'],int(time.time())))
+                con.execute('INSERT INTO audit_events(user_id,action,created_at) VALUES (?,?,?)',(user['id'],'review_request_created',int(time.time())))
         return create_run(workspace_id,'inspection',work)
 
     @app.post('/api/workspaces/{workspace_id}/code-runs',status_code=202)

@@ -70,6 +70,10 @@ class PromptInput(BaseModel):
     model_config = ConfigDict(extra="forbid")
     prompt: str = Field(min_length=1, max_length=2000)
 
+class ReviewAction(BaseModel):
+    action: str = Field(pattern=r'^(analyse|approve|disapprove)$')
+    note: str = Field(default='', max_length=1200)
+
 
 def create_app(db_path=None, model_engine=None):
     db_path = Path(db_path or ROOT / 'data' / 'workbench.sqlite3')
@@ -107,6 +111,19 @@ def create_app(db_path=None, model_engine=None):
           filename TEXT NOT NULL, size INTEGER NOT NULL, sha256 TEXT NOT NULL,
           created_at INTEGER NOT NULL);
         CREATE INDEX IF NOT EXISTS idx_documents_workspace ON documents(workspace_id, created_at);
+        CREATE TABLE IF NOT EXISTS document_metadata (
+          document_id TEXT PRIMARY KEY REFERENCES documents(id),
+          kind TEXT NOT NULL DEFAULT 'report' CHECK(kind IN ('reference','report'))
+        );
+        CREATE TABLE IF NOT EXISTS review_requests (
+          id TEXT PRIMARY KEY, run_id TEXT NOT NULL UNIQUE REFERENCES runs(id),
+          workspace_id TEXT NOT NULL REFERENCES workspaces(id),
+          document_id TEXT NOT NULL REFERENCES documents(id), requester_id TEXT NOT NULL REFERENCES users(id),
+          status TEXT NOT NULL CHECK(status IN ('pending_analysis','pending_approval','approved','disapproved')),
+          supervisor_id TEXT REFERENCES users(id), reviewer_note TEXT NOT NULL DEFAULT '',
+          created_at INTEGER NOT NULL, analysed_at INTEGER, decided_at INTEGER
+        );
+        CREATE INDEX IF NOT EXISTS idx_review_requests_workspace ON review_requests(workspace_id,status,created_at);
         CREATE TABLE IF NOT EXISTS generations (
           id TEXT PRIMARY KEY, workspace_id TEXT NOT NULL REFERENCES workspaces(id),
           prompt TEXT NOT NULL, result TEXT NOT NULL, created_at INTEGER NOT NULL);
@@ -296,6 +313,60 @@ def create_app(db_path=None, model_engine=None):
                     FROM workspaces w JOIN users u ON u.id=w.owner_id WHERE w.owner_id=? ORDER BY w.created_at DESC,w.rowid DESC''',(user['id'],)).fetchall()
         return {'workspaces': [dict(row) for row in rows]}
 
+    @app.get('/api/review-requests')
+    def review_requests(request: Request):
+        user=identity(request)
+        with database() as con:
+            if user['role']=='user':
+                where='rr.requester_id=?'; params=(user['id'],)
+            elif user['role']=='supervisor':
+                where='1=1'; params=()
+            else:
+                where='1=1'; params=()
+            rows=con.execute(f'''SELECT rr.id,rr.run_id,rr.workspace_id,rr.document_id,rr.status,rr.reviewer_note,
+                rr.created_at,rr.analysed_at,rr.decided_at,w.name AS workspace_name,
+                d.filename,ru.display_name AS requester_name,su.display_name AS supervisor_name,
+                r.result,r.events
+                FROM review_requests rr JOIN workspaces w ON w.id=rr.workspace_id JOIN documents d ON d.id=rr.document_id
+                JOIN users ru ON ru.id=rr.requester_id LEFT JOIN users su ON su.id=rr.supervisor_id
+                JOIN runs r ON r.id=rr.run_id WHERE {where} ORDER BY rr.created_at DESC''',params).fetchall()
+        result=[]
+        for row in rows:
+            item=dict(row);item['result']=__import__('json').loads(item['result'] or '{}');item['events']=__import__('json').loads(item['events'] or '[]');item.pop('result',None) if False else None
+            parsed=__import__('json').loads(row['result'] or '{}');item['summary']=parsed.get('draft') or parsed.get('answer') or parsed.get('error','');item['events']=__import__('json').loads(row['events'] or '[]');item.pop('result',None)
+            result.append(item)
+        return {'requests':result}
+
+    @app.get('/api/review-requests/{request_id}')
+    def review_request(request_id: str, request: Request):
+        user=identity(request)
+        with database() as con:
+            row=con.execute('''SELECT rr.*,w.name AS workspace_name,d.filename,d.sha256,
+                ru.display_name AS requester_name,su.display_name AS supervisor_name,r.result,r.events
+                FROM review_requests rr JOIN workspaces w ON w.id=rr.workspace_id JOIN documents d ON d.id=rr.document_id
+                JOIN users ru ON ru.id=rr.requester_id LEFT JOIN users su ON su.id=rr.supervisor_id JOIN runs r ON r.id=rr.run_id
+                WHERE rr.id=?''',(request_id,)).fetchone()
+        if not row:raise HTTPException(404,'Review request not found.')
+        if user['role']=='user' and row['requester_id']!=user['id']:raise HTTPException(404,'Review request not found.')
+        item=dict(row);item['result']=__import__('json').loads(row['result'] or '{}');item['events']=__import__('json').loads(row['events'] or '[]');return item
+
+    @app.patch('/api/review-requests/{request_id}')
+    def update_review_request(request_id: str, body: ReviewAction, request: Request):
+        user=identity(request,True)
+        if user['role'] not in ('supervisor','administrator'):raise HTTPException(403,'Supervisor or Administrator review access required.')
+        with database() as con:
+            row=con.execute('SELECT * FROM review_requests WHERE id=?',(request_id,)).fetchone()
+            if not row:raise HTTPException(404,'Review request not found.')
+            now=int(time.time());action=body.action;new_status=None
+            if action=='analyse' and row['status']=='pending_analysis':new_status='pending_approval'
+            elif action=='approve' and row['status']=='pending_approval':new_status='approved'
+            elif action=='disapprove' and row['status']=='pending_approval':new_status='disapproved'
+            else:raise HTTPException(409,f'Cannot {action} a request in {row["status"]} status.')
+            analysed=now if action=='analyse' else row['analysed_at'];decided=now if action in ('approve','disapprove') else row['decided_at']
+            con.execute('''UPDATE review_requests SET status=?,supervisor_id=?,reviewer_note=?,analysed_at=?,decided_at=? WHERE id=?''',(new_status,user['id'],body.note.strip(),analysed,decided,request_id))
+            con.execute('INSERT INTO audit_events(user_id,action,created_at) VALUES (?,?,?)',(user['id'],f'review_{action}:{request_id}',now))
+        return {'id':request_id,'status':new_status,'reviewer_note':body.note.strip(),'supervisor_id':user['id']}
+
     @app.post('/api/workspaces', status_code=201)
     def create_workspace(data: WorkspaceInput, request: Request):
         user = identity(request, True)
@@ -343,12 +414,15 @@ def create_app(db_path=None, model_engine=None):
         user = identity(request, True)
         owned_workspace(workspace_id, user, True)
         with database() as con:
+            if user['role'] != 'administrator' and con.execute("SELECT 1 FROM documents d JOIN document_metadata m ON m.document_id=d.id WHERE d.workspace_id=? AND m.kind='reference' LIMIT 1", (workspace_id,)).fetchone():
+                raise HTTPException(403, 'Only Administrators can change reference materials.')
             if con.execute("SELECT 1 FROM runs WHERE workspace_id=? AND status='running' LIMIT 1",(workspace_id,)).fetchone():
                 raise HTTPException(409, 'Wait for the active workflow to finish before deleting this workspace.')
             document_ids=[row['id'] for row in con.execute('SELECT id FROM documents WHERE workspace_id=?',(workspace_id,)).fetchall()]
             artifact_paths=[row['path'] for row in con.execute('SELECT path FROM artifacts WHERE workspace_id=?',(workspace_id,)).fetchall()]
             for document_id in document_ids:
                 con.execute('DELETE FROM pages WHERE document_id=?',(document_id,))
+                con.execute('DELETE FROM document_metadata WHERE document_id=?',(document_id,))
             con.execute('DELETE FROM artifacts WHERE workspace_id=?',(workspace_id,))
             con.execute('DELETE FROM runs WHERE workspace_id=?',(workspace_id,))
             con.execute('DELETE FROM generations WHERE workspace_id=?',(workspace_id,))
@@ -368,17 +442,32 @@ def create_app(db_path=None, model_engine=None):
         return {'ok': True}
 
     @app.get('/api/workspaces/{workspace_id}/documents')
-    def documents(workspace_id: str, request: Request):
+    def documents(workspace_id: str, request: Request, kind: str = 'all'):
         user = identity(request)
         owned_workspace(workspace_id, user)
+        if kind not in ('all','reference','report'):
+            raise HTTPException(422, 'Document kind must be reference or report.')
         with database() as con:
-            rows = con.execute('SELECT d.*, EXISTS(SELECT 1 FROM pages p WHERE p.document_id=d.id) AS extracted FROM documents d WHERE workspace_id=? ORDER BY created_at DESC, d.rowid DESC', (workspace_id,)).fetchall()
-        return {'documents': [dict(row) for row in rows], 'limit_bytes': 200 * 1024 * 1024}
+            rows = con.execute('''SELECT DISTINCT d.*,COALESCE(m.kind,'report') AS kind,
+                EXISTS(SELECT 1 FROM pages p WHERE p.document_id=d.id) AS extracted
+                FROM documents d JOIN workspaces dw ON dw.id=d.workspace_id LEFT JOIN document_metadata m ON m.document_id=d.id
+                JOIN users owners ON owners.id=dw.owner_id
+                WHERE ((d.workspace_id=? AND (?='all' OR COALESCE(m.kind,'report')=?))
+                    OR (? IN ('all','reference') AND COALESCE(m.kind,'report')='reference' AND owners.role='administrator'))
+                ORDER BY CASE WHEN COALESCE(m.kind,'report')='reference' THEN 0 ELSE 1 END,created_at DESC, d.rowid DESC''', (workspace_id,kind,kind,kind)).fetchall()
+        result=[]
+        for row in rows:
+            item=dict(row);item['report_id']=('IR-' if item['kind']=='report' else 'REF-')+item['id'].replace('-','')[:8].upper();item['status']='Ready' if item['extracted'] else 'Unread';item['progress']=100 if item['extracted'] else 25;result.append(item)
+        return {'documents': result, 'limit_bytes': 200 * 1024 * 1024}
 
     @app.post('/api/workspaces/{workspace_id}/documents', status_code=201)
-    async def upload(workspace_id: str, request: Request, filename: str):
+    async def upload(workspace_id: str, request: Request, filename: str, kind: str = 'report'):
         user = identity(request, True)
         owned_workspace(workspace_id, user, True)
+        if kind not in ('reference','report'):
+            raise HTTPException(422, 'Document kind must be reference or report.')
+        if kind=='reference' and user['role']!='administrator':
+            raise HTTPException(403, 'Only Administrators can add reference materials.')
         if not filename or len(filename) > 180 or any(ord(c) < 32 for c in filename) or '/' in filename or chr(92) in filename:
             raise HTTPException(400, 'Use a filename without folders or control characters (up to 180 characters).')
         suffix = Path(filename).suffix.lower()
@@ -421,6 +510,7 @@ def create_app(db_path=None, model_engine=None):
                     raise HTTPException(413, 'This workspace has reached its 200 MB storage limit.')
                 os.replace(temporary, destination)
                 con.execute('INSERT INTO documents VALUES (?,?,?,?,?,?)', tuple(item.values()))
+                con.execute('INSERT INTO document_metadata(document_id,kind) VALUES (?,?)',(document_id,kind))
                 con.execute('INSERT INTO audit_events(user_id,action,created_at) VALUES (?,?,?)', (user['id'], 'document_uploaded', int(time.time())))
             return item
         except BaseException:
@@ -432,8 +522,11 @@ def create_app(db_path=None, model_engine=None):
     def download(document_id: str, request: Request):
         user = identity(request)
         with database() as con:
-            row = con.execute('SELECT documents.*,workspaces.owner_id FROM documents JOIN workspaces ON documents.workspace_id=workspaces.id WHERE documents.id=?',(document_id,)).fetchone()
-        if row and row['owner_id']!=user['id'] and user['role'] not in ('supervisor','administrator'):row=None
+            row = con.execute('''SELECT documents.*,workspaces.owner_id,COALESCE(m.kind,'report') AS kind,u.role AS owner_role
+                FROM documents JOIN workspaces ON documents.workspace_id=workspaces.id JOIN users u ON u.id=workspaces.owner_id
+                LEFT JOIN document_metadata m ON m.document_id=documents.id WHERE documents.id=?''',(document_id,)).fetchone()
+        shared_reference=row and row['kind']=='reference' and row['owner_role']=='administrator'
+        if row and row['owner_id']!=user['id'] and not shared_reference and user['role'] not in ('supervisor','administrator'):row=None
         if not row:
             raise HTTPException(404, 'Document not found.')
         path = upload_dir / row['id']
@@ -445,16 +538,19 @@ def create_app(db_path=None, model_engine=None):
     def delete_document(document_id: str, request: Request):
         user = identity(request, True)
         with database() as con:
-            row = con.execute('''SELECT d.id,d.filename,d.workspace_id,w.owner_id
-                FROM documents d JOIN workspaces w ON d.workspace_id=w.id WHERE d.id=?''',(document_id,)).fetchone()
+            row = con.execute('''SELECT d.id,d.filename,d.workspace_id,w.owner_id,COALESCE(m.kind,'report') AS kind
+                FROM documents d JOIN workspaces w ON d.workspace_id=w.id LEFT JOIN document_metadata m ON m.document_id=d.id WHERE d.id=?''',(document_id,)).fetchone()
         if not row:
             raise HTTPException(404, 'Document not found.')
         owned_workspace(row['workspace_id'], user, True)
+        if row['kind']=='reference' and user['role']!='administrator':
+            raise HTTPException(403, 'Only Administrators can change reference materials.')
         with database() as con:
             referenced=con.execute("SELECT 1 FROM runs WHERE workspace_id=? AND status='running' LIMIT 1",(row['workspace_id'],)).fetchone()
             if referenced:
                 raise HTTPException(409, 'Wait for the active workflow to finish before deleting this material.')
             con.execute('DELETE FROM pages WHERE document_id=?',(document_id,))
+            con.execute('DELETE FROM document_metadata WHERE document_id=?',(document_id,))
             con.execute('DELETE FROM documents WHERE id=?',(document_id,))
             con.execute('INSERT INTO audit_events(user_id,action,created_at) VALUES (?,?,?)',
                         (user['id'], 'document_deleted', int(time.time())))

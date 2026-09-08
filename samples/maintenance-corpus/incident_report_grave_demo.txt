@@ -1,0 +1,58 @@
+FICTIONAL DEMONSTRATION RECORD — INTERNAL TEST DATA
+
+SERIOUS WORKPLACE INCIDENT REPORT
+Incident reference: INC-DEMO-014
+Classification: Internal — Confidential
+Status: Draft for investigation and human review
+
+Date and time: 2026-09-08 16:40
+Location: Press Shop, Plant 2, Hydraulic Press Line 3
+Asset: HP-800-03, 800-tonne hydraulic stamping press
+Reported by: T-1187
+Injured person: Worker W-204 (identity withheld in this demonstration)
+
+Incident severity: Serious injury / potential fatality
+
+Description
+During a die change, the press ram moved unexpectedly while a maintenance worker's left hand was inside the guarded tooling area. The worker sustained a severe crush injury to the hand and was transported to the site medical unit. No fatality occurred in this demonstration record. The exact movement cause has not yet been confirmed.
+
+Immediate actions taken
+- The emergency stop was activated and the machine was isolated.
+- Lockout-Tagout was applied after the movement stopped.
+- The area was barricaded and the Shift Supervisor was notified.
+- Plant Safety Officer and the site medical team were notified.
+- Work Order WO-DEMO-8821 was opened with Critical status.
+- The scene was preserved for investigation. Do not restart the press until the investigation lead releases it.
+
+Initial observations
+- The maintenance log records an accumulator pressure of 171 bar during the latest routine check.
+- The related preventive-maintenance SOP states that the accumulator should be depressurized below 5 bar before seal inspection.
+- A hydraulic fluid leak was previously noted at Seal #4.
+- The die-change permit and isolation checklist were not present at the work area when the scene was secured.
+- CCTV review and witness interviews are pending.
+
+Potential contributing conditions — preliminary only
+- Stored hydraulic energy may not have been fully released before the die-change activity.
+- The isolation verification step may not have been completed or documented.
+- The guard/interlock state and control-system event log require technical verification.
+- The previous seal condition and accumulator-pressure trend require review against SOP-PM-014 and MLF-03.
+
+Required investigation questions
+1. Was the press fully isolated and verified before the worker entered the tooling area?
+2. What pressure and stored-energy conditions existed at the time of the movement?
+3. Did any guard, interlock, valve, sensor, or control fault contribute?
+4. Which permit, LOTO, and die-change steps were completed and who verified them?
+5. Do the maintenance log and SOP require escalation or equipment quarantine beyond the actions already taken?
+
+Recommended containment pending investigation
+- Keep HP-800-03 out of service.
+- Maintain the scene and preserve CCTV, controller logs, permits, and witness statements.
+- Confirm medical follow-up and notify the required internal safety contacts.
+- Require a documented safety review before any restart or test movement.
+
+Sign-off
+Investigation lead: ____________________  Date: __________
+Shift Supervisor: ______________________  Date: __________
+Plant Safety Officer: ___________________  Date: __________
+
+This fictional record is supplied for software demonstration only. It does not authorize operation, maintenance, expenditure, medical decisions, or a final root-cause conclusion.

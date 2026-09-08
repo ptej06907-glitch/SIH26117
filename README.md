@@ -45,4 +45,14 @@ Open a workspace and follow Overview → Materials → Assistant → Workflows �
 - Workflows: create an inspection review pack as DOCX/XLSX/PPTX or generate and verify a fixed-purpose utility in WebAssembly.
 - Offline status: view current application and child-process connection observations.
 
+## Maintenance corpus test data
+
+The supplied HP-800 maintenance corpus is available in `samples/maintenance-corpus`. After creating or selecting a local account, import it into that account's workspace with:
+
+```powershell
+.\.venv\Scripts\python.exe scripts/import_maintenance_corpus.py pranav_tej
+```
+
+This creates or reuses `HP-800 maintenance reference`, stores the SOP, maintenance log, and incident report as local Materials, and extracts their pages for source-grounded questions. The JSON task list and XLSX test matrix are kept in `samples/test-fixtures` because the current Materials uploader accepts PDF, TXT, CSV, PNG, and JPEG.
+
 This remains a workstation prototype. Windows administrators can access its data; password recovery and enterprise account provisioning are not implemented. Generated output requires human review. Connection snapshots are useful evidence but are not a packet-capture certificate.

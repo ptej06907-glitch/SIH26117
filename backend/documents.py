@@ -7,6 +7,7 @@ from PIL import Image
 OCR_LOCK=threading.Lock()
 OCR=None
 Image.MAX_IMAGE_PIXELS=25_000_000
+PDF_PAGE_LIMIT=100
 
 def ocr_image(image):
     global OCR
@@ -29,7 +30,7 @@ def extract(path,filename,preview_dir,document_id):
     elif suffix=='.pdf':
         with pymupdf.open(path) as pdf:
             if pdf.needs_pass:raise ValueError('Password-protected PDFs are not supported.')
-            if len(pdf)>20:raise ValueError('Use a PDF with 20 pages or fewer for this prototype.')
+            if len(pdf)>PDF_PAGE_LIMIT:raise ValueError(f'Use a PDF with {PDF_PAGE_LIMIT} pages or fewer for this prototype.')
             for index,page in enumerate(pdf):
                 text=page.get_text()[:12000]
                 scale=min(2.0,1800/max(page.rect.width,page.rect.height))
@@ -56,8 +57,14 @@ def retrieve(records,query,limit=3):
     wanted=tokens(query);scored=[]
     for record in records:
         text=record['text']
-        for start in range(0,len(text),600):
-            chunk=text[start:start+800].strip()
+        sentences=[part.strip() for part in re.split(r'(?<=[.!?])\s+',text.replace('\r',' ').replace('\n',' ')) if part.strip()]
+        chunks=[];current=''
+        for sentence in sentences:
+            if current and len(current)+1+len(sentence)>800:
+                chunks.append(current);current=''
+            current=(current+' '+sentence).strip()
+        if current:chunks.append(current)
+        for chunk in chunks:
             if not chunk:continue
             score=len(tokens(chunk)&wanted)
             if score:scored.append((score,record,chunk))

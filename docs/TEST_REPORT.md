@@ -51,3 +51,40 @@ This is backend/integration and source validation, not an assertion of comprehen
 - Administrators can access all workspaces and change other account roles.
 - An Administrator cannot demote their own active account.
 - JavaScript syntax and interface element checks passed.
+
+## Maintenance corpus milestone — 2026-09-08
+
+- Copied the supplied SOP, maintenance log, and incident report into `samples/maintenance-corpus`.
+- Imported all three documents into the Administrator’s `HP-800 maintenance reference` workspace; SQLite contains three document records and their extracted page records.
+- Added a repeatable local importer at `scripts/import_maintenance_corpus.py`; repeated runs skip matching SHA-256 content.
+- Kept the supplied JSON task list and XLSX test matrix under `samples/test-fixtures` because the current Materials allow-list accepts PDF, TXT, CSV, PNG, and JPEG only.
+- Added an integration test covering all three corpus uploads, extraction, repeated Asset ID evidence, Work Order extraction, and an incident-threshold grounded question.
+- Corpus integration test: 1 passed. Full functional behavior remains limited to the current local model/retrieval and source-grounding implementation; T-06 confidentiality refusal, T-07 packet-capture proof, T-08 image dataset, T-09 SLA, and T-10 drift checks are not claimed complete.
+
+## Assistant incident intake milestone — 2026-09-08
+
+- Added a direct Assistant drop zone/file picker for incident reports and supporting evidence.
+- Attached files use the existing local upload and extraction path, then appear as ready chips in Assistant.
+- Enter submits the analysis request; Shift+Enter remains available for multi-line prompts.
+- Added same-page incident analysis wording and a Deliverables area with review-pack artifact links after completion.
+- Existing Materials remains the persistent reference library; Assistant attachments are also stored in the active workspace and therefore remain available after reload.
+- JavaScript syntax validation passed and the HTML interface contains 138 unique IDs.
+
+## Analysis presentation milestone — 2026-09-08
+
+- Added safe client-side rendering for headings, paragraphs, lists, inline emphasis/code, citation badges, and Markdown-style evidence tables.
+- Applied the renderer to saved Assistant answers and inspection workflow drafts; generated code remains in a code-style block.
+- JavaScript syntax validation passed after the rendering change.
+
+## Reference SOP artifact milestone — 2026-09-08
+
+- Created and rendered the original fictional refinery process-safety demonstration SOP.
+- Final PDF: 6 A4 pages, with header/footer, revision/classification cover, structured procedures, AI analysis protocol, test scenarios, and public source references.
+- Rendered page review passed after correcting cover line breaks and source-reference heading styling.
+- Companion TXT source is available for direct ingestion into Aegis Materials.
+
+## Longer PDF reference milestone — 2026-09-08
+
+- Increased supported PDF length from 20 to 100 pages per document.
+- Preserved the 20 MB file-size limit and existing OCR/page-rendering safeguards.
+- Updated the extraction error message to state the 100-page limit.

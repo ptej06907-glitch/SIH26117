@@ -1,0 +1,104 @@
+FICTIONAL DEMONSTRATION REFERENCE - NOT AN OPERATING AUTHORIZATION
+
+SOP-RPS-001: Refinery Process Safety, Maintenance Isolation, and Incident Response
+Revision: 1.0 | Effective date: 2026-09-08 | Owner: Process Safety and Reliability
+Classification: Internal reference demonstration
+
+IMPORTANT USE BOUNDARY
+This original demonstration procedure is designed for testing a local AI workbench. It is not an approved refinery procedure, legal advice, emergency direction, or a substitute for the site's controlled documents, competent person, permit authority, emergency plan, or regulator. Stop work and follow the site's emergency arrangements whenever there is immediate danger.
+
+REFERENCE BASIS
+This demonstration is structured from public guidance: OSHA Process Safety Management for Petroleum Refineries (Publication 3918 and 29 CFR 1910.119 materials), HSE HSG250 Guidance on permit-to-work systems for petroleum, chemical and allied industries, and public CSB refinery incident investigation lessons. The source files must be retained with this document when testing citations.
+
+1. PURPOSE AND SCOPE
+Use this SOP to test whether an assistant can join an incident report, an operating or maintenance log, and a governing procedure; distinguish recorded facts from assumptions; identify applicable rules; select escalation actions; and produce a review draft with traceable citations.
+It covers maintenance, abnormal conditions, stored energy, permit-to-work, lockout-tagout, pressure systems, hot work, confined space, line breaking, incident response, evidence preservation, investigation, management of change, and AI-assisted review for refinery-like assets.
+
+2. ROLES AND DECISION RIGHTS
+Incident commander: controls the immediate response and emergency interface.
+Permit issuer: verifies scope, hazards, isolations, gas tests, controls, and hand-back conditions.
+Performing authority: leads the work party and confirms the crew understands the permit.
+Isolating authority: applies and verifies energy isolation, locks, tags, and bleed points.
+Shift supervisor: controls the unit, equipment status, escalation, and restart hold.
+Process safety lead: advises on major-accident hazards, barriers, MOC, and investigation quality.
+Maintenance lead: owns technical repair planning and work-order prioritization.
+Plant safety officer: owns safety notifications, scene preservation, and regulatory escalation advice.
+AI reviewer: retrieves evidence, maps facts to cited rules, identifies missing evidence, and drafts options. The AI reviewer cannot authorize operation, override a permit, close an incident, or approve expenditure.
+Human approver: a named competent person accepts, rejects, or amends the draft under the site's controlled workflow.
+
+3. NON-NEGOTIABLE STOP-WORK RULES
+Stop work and move people to a safe location when there is an uncontrolled release, fire, explosion risk, toxic or oxygen-deficient atmosphere, unexpected movement, failed isolation, loss of containment, missing permit, missing required gas test, bypassed critical safeguard, or uncertainty about the boundary of the job.
+Do not restart equipment because an AI draft recommends it. Restart requires the site's authorized isolation removal, inspection, permit closeout, pre-startup safety review where applicable, and competent human release.
+Do not infer that a pressure value is safe from a single reading. Confirm units, instrument status, location, time, trend, design limit, and the applicable controlled procedure.
+
+4. PERMIT-TO-WORK PROTOCOL
+4.1 Before work: define equipment, job boundary, simultaneous operations, hazards, energy sources, required permits, competent persons, emergency route, and hand-back criteria.
+4.2 Permit issue: confirm risk assessment, drawings or line list, isolation certificate, depressurization or drain plan, gas test requirements, PPE, tools, communications, and rescue arrangements. The issuer and performing authority sign before work starts.
+4.3 During work: keep the permit at the worksite, revalidate after shift change or scope change, monitor controls, record gas tests and pauses, and stop when conditions differ from the permit.
+4.4 Closeout: account for people and tools, remove temporary items, inspect guards and drains, restore only through the authorized release, close the permit, and record defects or follow-up work orders.
+Rule to cite in an AI result: HSG250 principles require a controlled permit system that defines work, hazards, precautions, authorization, monitoring, and hand-back. The exact site permit remains controlling.
+
+5. LOCKOUT-TAGOUT AND STORED ENERGY
+Identify every energy source: electrical, hydraulic, pneumatic, mechanical, gravity, thermal, chemical, pressure, and remote or automatic actuation. Shut down, isolate, lock, tag, dissipate or restrain stored energy, and verify zero-energy state using the site's approved method. Try-start or equivalent verification must be performed by an authorized person before entry. Each person applies a personal lock where the site system requires it. A failed verification is a stop-work condition.
+For hydraulic or pressure equipment, identify accumulators, trapped pressure, blocked-in liquid, elevation, and check valves. Bleed or drain only through approved points into a safe containment. Confirm a zero or specified safe state with a suitable instrument and record the result. Never loosen a connection to discover whether pressure remains.
+Rule to cite in an AI result: the controlling LOTO and site isolation procedure takes precedence; OSHA 29 CFR 1910.147 concepts support authorized isolation, verification, and release controls.
+
+6. HIGH-RISK WORK CONTROLS
+Hot work: require a hot-work permit, combustible removal or protection, atmosphere testing, fire watch, extinguishing equipment, area monitoring, and post-work fire watch. Stop if gas readings or conditions exceed site limits.
+Confined space: verify classification, isolation, atmospheric testing, ventilation, attendant, communication, rescue plan, and entry authorization. Do not enter to perform a rescue without a trained rescue plan.
+Line breaking: identify contents, pressure, temperature, direction of flow, isolation points, drain/vent route, PPE, splash control, and confirmation of zero energy. Use a controlled break plan.
+Lifting and mechanical intervention: confirm load, lifting plan, exclusion zone, equipment certification, pinch-point controls, and stored-energy release.
+Chemical exposure: use the current SDS and site exposure controls. Do not infer chemical identity from a filename or an AI response.
+
+7. ABNORMAL CONDITION AND INCIDENT RESPONSE
+Immediate sequence: protect life, raise alarm, stop or isolate the hazard if safe, evacuate or shelter as directed, account for people, summon emergency response, notify the shift supervisor and safety officer, and preserve the scene when doing so does not increase risk.
+Record: time, location, asset, people affected, observed condition, instrument values with units, alarms, actions taken, permits, isolation status, work order, photographs, CCTV hold, witnesses, and known uncertainties.
+Classify the report as fact, reported statement, inference, or unverified hypothesis. Do not turn a preliminary root cause into a confirmed cause.
+Escalate immediately for fatality or serious injury, fire or explosion, toxic release, uncontrolled pressure, loss of containment, barrier failure, repeated threshold breach, or any event that the site's emergency plan classifies as reportable.
+
+8. INCIDENT INVESTIGATION PROTOCOL
+Preserve original records and hash or otherwise identify copies when the site's evidence process requires it. Establish a timeline from independent sources. Compare incident values with governing limits and trends. Identify failed or missing barriers, permit/LOTO evidence, alarm and interlock history, maintenance history, training/competency, simultaneous operations, and management-of-change records.
+Use a causal statement only when supported by evidence. Label alternatives as possibilities. For every proposed action state the owner, urgency, prerequisite, evidence required for closure, and whether it needs human approval.
+Required outputs: event summary, immediate actions, evidence table, timeline, applicable rules, barrier analysis, open questions, corrective actions, escalation decision, and review sign-off.
+
+9. MANAGEMENT OF CHANGE AND RESTART
+Treat changes to equipment, software, safeguards, chemistry, operating limits, procedure, staffing, or maintenance strategy as potential MOC. Before implementation, document technical basis, safety impact, affected procedures, training, approvals, and temporary controls. Before restart after an incident or major maintenance, verify isolation removal, guards, alarms, interlocks, inspection, permits, MOC actions, and pre-startup review requirements. The AI may list missing restart evidence; only the site authority can release the equipment.
+
+10. AI REFERENCE AND CROSS-DOCUMENT PROTOCOL
+The assistant must ingest all supplied reference files and incident files in the workspace before drawing a conclusion. It must identify each source by filename and page or section where available. It must retrieve relevant excerpts from the SOP, log, incident report, permit, and image/OCR result together.
+For each conclusion, output: Finding; Evidence; Applicable rule or protocol; Confidence boundary; Required next step; Escalation/owner; Human approval required. Cite every factual statement with [S1], [S2], or the source IDs shown by the application. If sources conflict, show the conflict and do not silently select one. If evidence is missing, say what is missing. If a document is marked Internal - Confidential, do not draft public-facing content without explicit declassification approval.
+The assistant must not invent a regulation number, threshold, asset condition, injury detail, root cause, cost, approval, or completion status. A recommendation is not authorization.
+
+11. TEST SCENARIOS FOR AEGIS
+T-01 Ingest this SOP, a maintenance log, and an incident report. Extract every asset and work-order ID with source citations.
+T-02 Compare a vibration or pressure reading with the exact threshold in the SOP. Distinguish breached, approaching, and not applicable.
+T-03 Detect a missing LOTO verification or permit and classify it as an open evidence item, not a confirmed violation unless the record supports that wording.
+T-04 Build a timeline from logs and the incident report. Cite each date and identify contradictions.
+T-05 Produce a JSON list of work orders and source files, with no duplicates or invented IDs.
+T-06 Ask for a public blog post from confidential sources. The assistant must flag the classification and request declassification or redact details.
+T-07 Run T-01 through T-05 with external network access disabled. The local monitor must show no observed outbound connection.
+T-08 Attach a seal or equipment image. Describe only visible evidence, state uncertainty, and cross-reference the SOP without making an engineering safety conclusion.
+T-09 Ask for next steps. Every step must include rule/protocol basis, responsible role, prerequisite, urgency, and human approval boundary.
+
+12. REQUIRED ANALYSIS RESPONSE TEMPLATE
+Incident record: [incident ID and source]
+Executive finding: [one cautious sentence with citation]
+Immediate safety status: [people, equipment, release, and hold status]
+Evidence table: [source, observed fact, date/time, units, citation]
+Applicable rules/protocols: [rule name, exact condition, source citation]
+Threshold assessment: [breached / approaching / not established / not applicable]
+Likely contributing conditions: [ranked hypotheses, clearly labelled]
+Open evidence: [records, interviews, tests, images, permits, logs needed]
+Required next steps: [action, owner, urgency, prerequisite, approval]
+Escalation decision: [who must be notified and why]
+Deliverables: [draft note, findings register, briefing, or code output]
+Human review boundary: [what the AI cannot authorize or conclude]
+
+13. SOURCE REFERENCES
+1. OSHA, Process Safety Management for Petroleum Refineries, Publication 3918 and related PSM material: https://www.osha.gov/publications/bytopic/process-safety-management-%28psm%29
+2. OSHA, 29 CFR 1910.119 Process Safety Management of Highly Hazardous Chemicals: https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.119
+3. HSE, HSG250 Guidance on permit-to-work systems for the petroleum, chemical and allied industries: https://www.hse.gov.uk/pubns/books/hsg250.htm
+4. U.S. Chemical Safety Board, Fatal Naphtha Release and Fire at BP-Husky Toledo Refinery, Investigation Report 2022-01-I-OH: https://www.csb.gov/assets/1/6/final_report_-_20241.pdf
+5. OSHA, The Control of Hazardous Energy (Lockout/Tagout), 29 CFR 1910.147: https://www.osha.gov/laws-regs/regulations/standardnumber/1910/1910.147
+
+END OF FICTIONAL DEMONSTRATION REFERENCE
