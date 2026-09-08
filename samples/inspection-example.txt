@@ -1,0 +1,7 @@
+FICTIONAL DEMONSTRATION DATA — NOT AN MRPL REPORT
+
+Inspection reference: DEMO-001
+Equipment tag: P-DEMO-101
+Observation: Label on the sample equipment is partly unreadable.
+Requested action: Review the source and draft a note after AI integration.
+No engineering measurements or maintenance recommendations are supplied.

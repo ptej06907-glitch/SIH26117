@@ -1,0 +1,21 @@
+[
+  {
+    "id": "general",
+    "name": "Qwen2.5 1.5B Instruct",
+    "file": "general.gguf",
+    "capability": "general"
+  },
+  {
+    "id": "coding",
+    "name": "Qwen2.5 Coder 1.5B Instruct",
+    "file": "coding.gguf",
+    "capability": "coding"
+  },
+  {
+    "id": "vision",
+    "name": "SmolVLM 500M",
+    "file": "vision.gguf",
+    "projector": "vision-projector.gguf",
+    "capability": "vision"
+  }
+]

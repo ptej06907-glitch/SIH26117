@@ -1,0 +1,22 @@
+[
+  {
+    "prompt": "Write a two-sentence note requesting review of inspection report DEMO-001. No findings or costs have been supplied. Do not invent them.",
+    "model_id": "general",
+    "model_name": "Qwen2.5 1.5B Instruct",
+    "capability": "general",
+    "routing_reason": "The request is a general writing, explanation or reasoning task.",
+    "answer": "Please review the inspection report DEMO-001 for any findings or costs associated with it.",
+    "duration_ms": 4041,
+    "finish_reason": "stop"
+  },
+  {
+    "prompt": "Write a short Python function celsius_to_fahrenheit(c) that converts Celsius to Fahrenheit. Include one example.",
+    "model_id": "coding",
+    "model_name": "Qwen2.5 Coder 1.5B Instruct",
+    "capability": "coding",
+    "routing_reason": "The request includes a programming task or programming language.",
+    "answer": "```python\ndef celsius_to_fahrenheit(c):\n    \"\"\"\n    Convert Celsius to Fahrenheit.\n    \n    Parameters:\n    c (float): Temperature in Celsius.\n    \n    Returns:\n    float: Temperature in Fahrenheit.\n    \"\"\"\n    return (c * 9/5) + 32\n\n# Example usage:\ncelsius = 25\nfahrenheit = celsius_to_fahrenheit(celsius)\nprint(f\"{celsius}\u00b0C is equal to {fahrenheit}\u00b0F\")\n```\n\nThis function takes a temperature in Celsius as input and returns the equivalent temperature in Fahrenheit using the formula `(Celsius * 9/5) + 32`. The example usage converts 25\u00b0C to Fahrenheit and prints the result.",
+    "duration_ms": 10687,
+    "finish_reason": "stop"
+  }
+]

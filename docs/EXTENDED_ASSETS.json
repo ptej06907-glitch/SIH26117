@@ -1,0 +1,17 @@
+[
+  [
+    "runtime/python.wasm",
+    "https://github.com/vmware-labs/webassembly-language-runtimes/releases/download/python/3.12.0%2B20231211-040d5a6/python-3.12.0.wasm",
+    "e5dc5a398b07b54ea8fdb503bf68fb583d533f10ec3f930963e02b9505f7a763"
+  ],
+  [
+    "models/vision.gguf",
+    "https://huggingface.co/ggml-org/SmolVLM-500M-Instruct-GGUF/resolve/main/SmolVLM-500M-Instruct-Q8_0.gguf?download=true",
+    "9d4612de6a42214499e301494a3ecc2be0abdd9de44e663bda63f1152fad1bf4"
+  ],
+  [
+    "models/vision-projector.gguf",
+    "https://huggingface.co/ggml-org/SmolVLM-500M-Instruct-GGUF/resolve/main/mmproj-SmolVLM-500M-Instruct-Q8_0.gguf?download=true",
+    "d1eb8b6b23979205fdf63703ed10f788131a3f812c7b1f72e0119d5d81295150"
+  ]
+]

@@ -1,0 +1,42 @@
+{
+  "arithmetic": {
+    "exit_code": 0,
+    "stdout": "5\n",
+    "stderr": "",
+    "reason": "completed",
+    "truncated": false,
+    "isolation": "WebAssembly/WASI; no host directories, environment or network grants"
+  },
+  "host_file": {
+    "exit_code": 1,
+    "stdout": "",
+    "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\nFileNotFoundError: [Errno 44] No such file or directory: 'C:/Windows/win.ini'\n",
+    "reason": "completed",
+    "truncated": false,
+    "isolation": "WebAssembly/WASI; no host directories, environment or network grants"
+  },
+  "network": {
+    "exit_code": 1,
+    "stdout": "",
+    "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n  File \"/wlr/build-staging/python/v3.12.0-aio/checkout/Lib/socket.py\", line 828, in create_connection\n  File \"/wlr/build-staging/python/v3.12.0-aio/checkout/Lib/socket.py\", line 963, in getaddrinfo\nAttributeError: module '_socket' has no attribute 'getaddrinfo'\n",
+    "reason": "completed",
+    "truncated": false,
+    "isolation": "WebAssembly/WASI; no host directories, environment or network grants"
+  },
+  "loop": {
+    "exit_code": 1,
+    "stdout": "",
+    "stderr": "",
+    "reason": ": 0x19100d - <unknown>!<wasm function 3281>\n    3: 0x190ddb - <unknown>!<wasm function 3280>\n    4: 0x231f09 - <unknown>!<wasm function 4055>\n    5: 0x231d63 - <unknown>!<wasm function 4053>\n    6: 0x2320d0 - <unknown>!<wasm function 4057>\n    7: 0x231fb4 - <unknown>!<wasm function 4056>\n    8:   0x86e9 - <unknown>!<wasm function 43>\nnote: using the `WASMTIME_BACKTRACE_DETAILS=1` environment variable may show more debugging information\n\nCaused by:\n    wasm trap: all fuel consumed by WebAssembly\n",
+    "truncated": false,
+    "isolation": "WebAssembly/WASI; no host directories, environment or network grants"
+  },
+  "memory": {
+    "exit_code": 1,
+    "stdout": "",
+    "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\nMemoryError\n",
+    "reason": "completed",
+    "truncated": false,
+    "isolation": "WebAssembly/WASI; no host directories, environment or network grants"
+  }
+}

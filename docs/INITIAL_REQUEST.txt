@@ -1,0 +1,320 @@
+We are starting a Smart India Hackathon (SIH) 2026 project from scratch.
+
+The problem statement is posted by:
+
+Mangalore Refinery and Petrochemicals Limited (MRPL)
+
+IMPORTANT:
+Do NOT start coding or generating the frontend yet.
+
+Your first responsibility is to deeply analyze and understand the complete problem statement and help us create a technically correct implementation plan.
+
+I will provide/upload the official SIH problem statement and any related documents after this message.
+
+Your task should be performed in the following phases.
+
+====================================================
+PHASE 1 — PROBLEM STATEMENT UNDERSTANDING
+====================================================
+
+Carefully read every detail of the official MRPL problem statement.
+
+Extract and explain:
+
+1. Organization name
+2. Problem Statement ID
+3. Problem Statement title
+4. Exact problem being requested
+5. Existing problem/pain point
+6. Who faces this problem
+7. Why this problem matters specifically for MRPL
+8. Expected outcome from SIH participants
+9. Functional requirements explicitly mentioned
+10. Non-functional requirements explicitly mentioned
+11. Input data required
+12. Expected output
+13. Expected users/stakeholders
+14. Constraints mentioned in the problem statement
+15. Any hidden assumptions or ambiguities
+
+Do not invent requirements.
+
+Clearly separate:
+
+A. Explicit requirements from the SIH problem statement
+B. Reasonable technical assumptions
+C. Optional features that could improve the prototype
+
+====================================================
+PHASE 2 — DOMAIN RESEARCH AND CONTEXT
+====================================================
+
+Understand the relevant MRPL domain context.
+
+Explain only the domain knowledge necessary to solve this problem.
+
+For example, identify whether the problem relates to areas such as:
+
+- Refinery operations
+- Petrochemicals
+- Industrial safety
+- Equipment monitoring
+- Predictive maintenance
+- Supply chain
+- Environmental monitoring
+- Energy optimization
+- Employee safety
+- Inspection
+- Documentation
+- Data analytics
+- AI/ML
+- Computer vision
+- IoT
+
+Do not assume the category. Determine it from the actual problem statement.
+
+Then explain:
+
+1. Current industry workflow
+2. Where the problem occurs
+3. Why existing approaches may fail
+4. What type of data may realistically be available
+5. What a practical AI/software solution could look like
+
+====================================================
+PHASE 3 — SOLUTION DESIGN OPTIONS
+====================================================
+
+Generate 3 possible solution approaches.
+
+For each approach provide:
+
+- Solution concept
+- Required technologies
+- Required datasets
+- Required AI/ML models, if any
+- Required APIs
+- Difficulty level
+- Prototype feasibility
+- Advantages
+- Limitations
+- SIH demonstration potential
+
+Then compare all three approaches.
+
+Recommend ONE approach that is:
+
+- Realistic for a 6-member student team
+- Buildable as an MVP/prototype
+- Technically impressive
+- Easy to demonstrate during SIH evaluation
+- Directly connected to the MRPL problem statement
+- Expandable into a real-world system
+
+====================================================
+PHASE 4 — REQUIREMENTS ARCHITECTURE
+====================================================
+
+After recommending the best approach, create a complete requirement structure.
+
+Divide the system into:
+
+1. User Interface Layer
+2. Backend/API Layer
+3. Database Layer
+4. AI/ML Layer
+5. Data Processing Layer
+6. Authentication and Security Layer
+7. Deployment Layer
+
+For every layer specify:
+
+- Purpose
+- Components required
+- Technology options
+- Minimum MVP requirement
+- Optional advanced implementation
+
+====================================================
+PHASE 5 — MODEL AND AI REQUIREMENTS
+====================================================
+
+If AI/ML is required, identify exactly which models are needed.
+
+For every proposed model specify:
+
+1. Model purpose
+2. Input
+3. Output
+4. Training required or pre-trained
+5. Dataset requirement
+6. Recommended lightweight model
+7. Alternative advanced model
+8. Whether it can run locally
+9. Whether it can realistically be integrated by students using Codex
+10. MVP implementation approach
+
+IMPORTANT:
+
+Do not suggest unnecessary AI models.
+
+If a rule-based system, analytics model, simulation, anomaly detection algorithm, computer vision API, or existing pre-trained model is more practical than training a complex deep learning model, clearly recommend that instead.
+
+Our goal is NOT to use AI everywhere.
+
+Our goal is to solve the MRPL problem effectively.
+
+====================================================
+PHASE 6 — MVP DEFINITION
+====================================================
+
+Define exactly what we should build for the SIH prototype.
+
+Separate features into:
+
+MUST HAVE
+SHOULD HAVE
+OPTIONAL / FUTURE
+
+The MUST HAVE version should be small enough to complete reliably.
+
+For every feature explain:
+
+- User action
+- System processing
+- Output/result
+
+====================================================
+PHASE 7 — SYSTEM WORKFLOW
+====================================================
+
+Create a complete end-to-end workflow.
+
+Use this format:
+
+USER
+   ↓
+FRONTEND
+   ↓
+BACKEND
+   ↓
+DATA PROCESSING
+   ↓
+AI/ML MODEL (if required)
+   ↓
+DATABASE / STORAGE
+   ↓
+RESULT / DASHBOARD / ALERT
+
+Explain what happens at every step.
+
+====================================================
+PHASE 8 — PROTOTYPE ARCHITECTURE
+====================================================
+
+Propose a clean and simple architecture that can be built by a student team.
+
+Prefer technologies that are:
+
+- Easy to develop
+- Easy to integrate
+- Stable
+- Open source where possible
+- Easy to demonstrate
+- Compatible with Codex-assisted development
+
+Avoid unnecessary microservices and enterprise complexity.
+
+Recommend a simple stack such as appropriate combinations of:
+
+Frontend
+Backend
+Database
+AI/ML
+Authentication
+Deployment
+
+But choose technologies based on the actual MRPL problem requirements, not blindly.
+
+====================================================
+PHASE 9 — TEAM WORK DISTRIBUTION
+====================================================
+
+We have 6 team members.
+
+After understanding the problem, divide the implementation into 6 logical roles.
+
+For each member specify:
+
+- Responsibility
+- Features/modules
+- Technologies to learn/use
+- Dependencies on other members
+- Expected deliverable
+
+Make sure the work can happen partially in parallel.
+
+====================================================
+PHASE 10 — CODING ROADMAP
+====================================================
+
+Only after completing all previous analysis, create a coding roadmap.
+
+Divide development into:
+
+STEP 1 — Project setup
+STEP 2 — Database/data preparation
+STEP 3 — Backend
+STEP 4 — AI/ML integration
+STEP 5 — Frontend
+STEP 6 — Integration
+STEP 7 — Testing
+STEP 8 — Demo preparation
+STEP 9 — Deployment
+
+For every step provide:
+
+- What needs to be built
+- Expected files/folders
+- Dependencies
+- Completion criteria
+
+====================================================
+OUTPUT FORMAT
+====================================================
+
+Return your analysis in this exact structure:
+
+1. Problem Statement Summary
+2. Explicit Requirements
+3. Assumptions and Ambiguities
+4. MRPL Domain Context
+5. Stakeholders and Users
+6. Three Possible Solutions
+7. Recommended Solution
+8. MVP Features
+9. Advanced Features
+10. Required Technologies
+11. Required AI/ML Models
+12. System Architecture
+13. End-to-End Workflow
+14. Database Requirements
+15. API Requirements
+16. UI Screens Required
+17. 6-Member Team Distribution
+18. Development Roadmap
+19. Major Technical Risks
+20. What We Should Clarify Before Coding
+
+CRITICAL RULES:
+
+- Do not start writing implementation code yet.
+- Do not create UI yet.
+- Do not overcomplicate the architecture.
+- Do not invent requirements and present them as official requirements.
+- Clearly distinguish official requirements from our proposed solution.
+- Focus on creating a winning SIH prototype that is realistic and demonstrable.
+- Challenge weak or impractical ideas instead of blindly agreeing.
+- Prefer a reliable working prototype over an overly ambitious incomplete system.
+
+Wait until I provide the official MRPL SIH problem statement/document before performing the analysis.

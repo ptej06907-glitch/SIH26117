@@ -1,0 +1,389 @@
+{
+  "inspection-scan.pdf": {
+    "pages": [
+      {
+        "page": 1,
+        "text": "FICTIONAL DEMONSTRATION REPORT\nInspection reference: DEMO-002\nEquipment: P-101\nFinding: identification label damaged,\nRecommendation: replace the damaged label after review.\nCost: not provided.\nNo operational safety conclusion is supplied.",
+        "method": "ocr",
+        "warnings": [
+          "OCR may misread measurements, identifiers and handwriting. Check the original page."
+        ],
+        "lines": [
+          {
+            "text": "FICTIONAL DEMONSTRATION REPORT",
+            "confidence": 0.9,
+            "box": [
+              [
+                62.0,
+                60.0
+              ],
+              [
+                659.0,
+                60.0
+              ],
+              [
+                659.0,
+                86.0
+              ],
+              [
+                62.0,
+                86.0
+              ]
+            ]
+          },
+          {
+            "text": "Inspection reference: DEMO-002",
+            "confidence": 0.893,
+            "box": [
+              [
+                60.0,
+                144.0
+              ],
+              [
+                533.0,
+                143.0
+              ],
+              [
+                533.0,
+                173.0
+              ],
+              [
+                60.0,
+                174.0
+              ]
+            ]
+          },
+          {
+            "text": "Equipment: P-101",
+            "confidence": 0.903,
+            "box": [
+              [
+                60.0,
+                229.0
+              ],
+              [
+                318.0,
+                227.0
+              ],
+              [
+                318.0,
+                260.0
+              ],
+              [
+                60.0,
+                262.0
+              ]
+            ]
+          },
+          {
+            "text": "Finding: identification label damaged,",
+            "confidence": 0.883,
+            "box": [
+              [
+                61.0,
+                315.0
+              ],
+              [
+                588.0,
+                315.0
+              ],
+              [
+                588.0,
+                344.0
+              ],
+              [
+                61.0,
+                344.0
+              ]
+            ]
+          },
+          {
+            "text": "Recommendation: replace the damaged label after review.",
+            "confidence": 0.933,
+            "box": [
+              [
+                61.0,
+                400.0
+              ],
+              [
+                897.0,
+                400.0
+              ],
+              [
+                897.0,
+                429.0
+              ],
+              [
+                61.0,
+                429.0
+              ]
+            ]
+          },
+          {
+            "text": "Cost: not provided.",
+            "confidence": 0.893,
+            "box": [
+              [
+                62.0,
+                485.0
+              ],
+              [
+                329.0,
+                485.0
+              ],
+              [
+                329.0,
+                515.0
+              ],
+              [
+                62.0,
+                515.0
+              ]
+            ]
+          },
+          {
+            "text": "No operational safety conclusion is supplied.",
+            "confidence": 0.936,
+            "box": [
+              [
+                61.0,
+                570.0
+              ],
+              [
+                694.0,
+                570.0
+              ],
+              [
+                694.0,
+                599.0
+              ],
+              [
+                61.0,
+                599.0
+              ]
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "demo-sop.txt": {
+    "pages": [
+      {
+        "page": 1,
+        "text": "FICTIONAL SOP DEMO-01 revision 1\nDamaged equipment identification labels require review by the maintenance supervisor. Costs must be supplied separately before financial approval. This is demonstration material, not an MRPL procedure.\n",
+        "method": "text",
+        "warnings": [],
+        "lines": []
+      }
+    ]
+  },
+  "grounded_answer": {
+    "id": "61776761-e470-428c-a730-7d15bb18d6ba",
+    "prompt": "What is damaged on P-101 and are costs supplied?",
+    "created_at": 1788816194,
+    "model_id": "general",
+    "model_name": "Qwen2.5 1.5B Instruct",
+    "capability": "general",
+    "routing_reason": "A document-grounded answer requires the general model and local evidence.",
+    "answer": "Based on the source excerpts:\n\n- The equipment P-101 is damaged.\n- Costs are not supplied for the damaged identification label.",
+    "duration_ms": 5798,
+    "finish_reason": "stop",
+    "sources": [
+      {
+        "ref": "S1",
+        "document_id": "f9c26af0-8b80-4778-a162-6c559a8fcd5e",
+        "filename": "demo-sop.txt",
+        "page": 1,
+        "text": "FICTIONAL SOP DEMO-01 revision 1\nDamaged equipment identification labels require review by the maintenance supervisor. Costs must be supplied separately before financial approval. This is demonstration material, not an MRPL procedure."
+      },
+      {
+        "ref": "S2",
+        "document_id": "54f445ba-3613-4aba-b072-b9e43dd5c571",
+        "filename": "inspection-scan.pdf",
+        "page": 1,
+        "text": "FICTIONAL DEMONSTRATION REPORT\nInspection reference: DEMO-002\nEquipment: P-101\nFinding: identification label damaged,\nRecommendation: replace the damaged label after review.\nCost: not provided.\nNo operational safety conclusion is supplied."
+      }
+    ],
+    "citation_format_valid": false,
+    "review_note": "Source links identify retrieved evidence; review whether each claim is supported."
+  },
+  "vision_status": 201,
+  "vision": {
+    "id": "b5d50a6e-4b7b-40fe-abbc-4919691436b1",
+    "prompt": "Describe the visible content in this image. Do not infer safety, hidden connections or unreadable measurements.",
+    "created_at": 1788816203,
+    "model_id": "vision",
+    "model_name": "SmolVLM 500M",
+    "capability": "vision",
+    "routing_reason": "An image was supplied, so the local vision model is required.",
+    "answer": " Fictional Demonstration Report. Inspection reference: DEMO-002. Equipment: P-101. Finding: identification label damaged. Recommendation: replace the damaged label after review. Cost: not provided. No operational safety conclusion is supplied.",
+    "duration_ms": 8902,
+    "finish_reason": "stop",
+    "sources": [
+      {
+        "ref": "Image",
+        "document_id": "54f445ba-3613-4aba-b072-b9e43dd5c571",
+        "filename": "inspection-scan.pdf",
+        "page": 1,
+        "text": "Visual interpretation of page 1; may be inaccurate. Check the original."
+      }
+    ],
+    "review_note": "Small vision model output is preliminary. No engineering validation was performed."
+  },
+  "review_run": {
+    "id": "6bc6e1c7-e79a-4198-8bf9-ab1580f92700",
+    "workspace_id": "fbdbf403-88a6-4575-8e6f-13318b24e7f1",
+    "kind": "inspection",
+    "status": "complete",
+    "events": [
+      {
+        "time": 1788816203,
+        "message": "Plan: read the selected report, retrieve evidence, draft, check references and create Office files."
+      },
+      {
+        "time": 1788816205,
+        "message": "Read selected report and retained page references."
+      },
+      {
+        "time": 1788816205,
+        "message": "Retrieved 2 excerpts from the local collection."
+      },
+      {
+        "time": 1788816217,
+        "message": "Generated a draft using the general local model."
+      },
+      {
+        "time": 1788816217,
+        "message": "Reference check failed. Requesting one revision with valid source IDs."
+      },
+      {
+        "time": 1788816228,
+        "message": "Model references remained unreliable. Producing an explicitly extractive review note."
+      },
+      {
+        "time": 1788816229,
+        "message": "Created editable Word, Excel and PowerPoint files; human review remains required."
+      }
+    ],
+    "result": {
+      "draft": "Please review the following source observations before deciding any action.\n[S1] FICTIONAL SOP DEMO-01 revision 1\nDamaged equipment identification labels require review by the maintenance supervisor. Costs must be supplied separately before financial approval. This is demonstration material, not an MRPL procedure.\n[S2] FICTIONAL DEMONSTRATION REPORT\nInspection reference: DEMO-002\nEquipment: P-101\nFinding: identification label damaged,\nRecommendation: replace the damaged label after review.\nCost: not provided.\nNo operational safety conclusion is supplied.\nCosts and authorization details require reviewer confirmation.",
+      "sources": [
+        {
+          "ref": "S1",
+          "document_id": "f9c26af0-8b80-4778-a162-6c559a8fcd5e",
+          "filename": "demo-sop.txt",
+          "page": 1,
+          "text": "FICTIONAL SOP DEMO-01 revision 1\nDamaged equipment identification labels require review by the maintenance supervisor. Costs must be supplied separately before financial approval. This is demonstration material, not an MRPL procedure."
+        },
+        {
+          "ref": "S2",
+          "document_id": "54f445ba-3613-4aba-b072-b9e43dd5c571",
+          "filename": "inspection-scan.pdf",
+          "page": 1,
+          "text": "FICTIONAL DEMONSTRATION REPORT\nInspection reference: DEMO-002\nEquipment: P-101\nFinding: identification label damaged,\nRecommendation: replace the damaged label after review.\nCost: not provided.\nNo operational safety conclusion is supplied."
+        }
+      ],
+      "artifacts": [
+        {
+          "id": "f6d61ced-51ae-482d-92e3-72b9648aab62",
+          "filename": "approval-note.docx"
+        },
+        {
+          "id": "551a0c5c-9e43-4218-9cc2-f45f6b7d5cfe",
+          "filename": "findings-register.xlsx"
+        },
+        {
+          "id": "286b4b49-fa99-4ff0-991d-c864c2fa02c9",
+          "filename": "inspection-briefing.pptx"
+        }
+      ],
+      "review_required": true
+    },
+    "created_at": 1788816203
+  },
+  "code_run": {
+    "id": "15a4d367-1376-4d3a-93aa-d4666ea59952",
+    "workspace_id": "fbdbf403-88a6-4575-8e6f-13318b24e7f1",
+    "kind": "coding",
+    "status": "complete",
+    "events": [
+      {
+        "time": 1788816229,
+        "message": "Plan: generate the function, run it in WebAssembly, compare independent cases and repair at most once."
+      },
+      {
+        "time": 1788816236,
+        "message": "Attempt 1: all three independent cases passed."
+      },
+      {
+        "time": 1788816236,
+        "message": "Verification finished in a WebAssembly runtime with no host filesystem or network grants."
+      }
+    ],
+    "result": {
+      "code": "def celsius_to_fahrenheit(value):\n    return value * 9 / 5 + 32",
+      "checks": [
+        {
+          "input": -40,
+          "expected": -40,
+          "actual": -40.0,
+          "passed": true
+        },
+        {
+          "input": 0,
+          "expected": 32,
+          "actual": 32.0,
+          "passed": true
+        },
+        {
+          "input": 100,
+          "expected": 212,
+          "actual": 212.0,
+          "passed": true
+        }
+      ],
+      "execution": {
+        "exit_code": 0,
+        "stdout": "AEGIS_RESULTS=[-40.0, 32.0, 212.0]\n",
+        "stderr": "",
+        "reason": "completed",
+        "truncated": false,
+        "isolation": "WebAssembly/WASI; no host directories, environment or network grants"
+      },
+      "artifacts": [
+        {
+          "id": "922c6664-79e9-4e6e-b36a-2f1437eb376b",
+          "filename": "utility.py"
+        }
+      ],
+      "verified": true
+    },
+    "created_at": 1788816229
+  },
+  "network": {
+    "started_at": 1788816185,
+    "samples": 98,
+    "external_connections": [],
+    "observation_errors": 0,
+    "scope": "Python application and descendant processes; connection snapshots, not packet capture",
+    "packet_capture": "not_collected",
+    "python_guard": true,
+    "last_sample": 1788816237,
+    "connections": [
+      {
+        "pid": 39820,
+        "peer": "127.0.0.1",
+        "port": 49693,
+        "status": "ESTABLISHED"
+      },
+      {
+        "pid": 39820,
+        "peer": "127.0.0.1",
+        "port": 49692,
+        "status": "ESTABLISHED"
+      }
+    ],
+    "blocked_python_attempts": []
+  }
+}

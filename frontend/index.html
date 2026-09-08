@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0b1724">
+  <meta name="description" content="Aegis is a private, on-premise AI workbench for industrial knowledge work.">
+  <title>Aegis · Local workbench</title>
+  <link rel="stylesheet" href="/assets/style.css">
+  <script src="/assets/app.js" defer></script>
+</head>
+<body>
+<div id="boot" role="status"><span class="boot-mark">A</span><span>Opening Aegis…</span></div>
+
+<main id="auth-view" class="auth-layout" hidden>
+  <section class="brand-panel">
+    <a class="brand" href="/" aria-label="Aegis home"><span class="brand-mark">A</span><span>aegis</span><span class="brand-local">ON-PREMISE AI</span></a>
+    <div class="brand-copy">
+      <p class="eyebrow">SOVEREIGN INDUSTRIAL WORKBENCH</p>
+      <h1>Confidential work<br>stays on this machine.</h1>
+      <p>Read internal material, draft approval packs and verify small utilities with local AI models.</p>
+      <div class="trust-list" aria-label="Local workbench capabilities"><span><i>01</i> Local models</span><span><i>02</i> Private workspaces</span><span><i>03</i> Reviewable outputs</span></div>
+    </div>
+    <footer><span class="status-dot"></span> Local service ready <span class="footer-divider">/</span> SIH 26117</footer>
+  </section>
+  <section class="auth-panel">
+    <div class="auth-top"><span>MRPL · SMART AUTOMATION</span><span class="version">PROTOTYPE</span></div>
+    <div class="auth-card">
+      <p class="eyebrow ink">SECURE LOCAL ACCESS</p><h2 id="auth-title">User portal</h2><p id="auth-subtitle" class="muted">Sign in to your private workspaces.</p>
+      <div class="portal-switch" role="group" aria-label="Choose login portal"><button type="button" class="portal-option active" data-portal="user"><span>01</span><strong>User</strong><small>My work</small></button><button type="button" class="portal-option" data-portal="supervisor"><span>02</span><strong>Supervisor</strong><small>Team review</small></button><button type="button" class="portal-option" data-portal="administrator"><span>03</span><strong>Administrator</strong><small>Full control</small></button></div>
+      <div id="auth-switch" class="auth-switch" role="group" aria-label="Account action"><button id="login-tab" class="active" aria-pressed="true" type="button">Sign in</button><button id="register-tab" aria-pressed="false" type="button">Create account</button></div>
+      <form id="auth-form">
+        <div id="name-field" hidden><label for="display-name">Your name</label><input id="display-name" name="display_name" maxlength="60" autocomplete="name" placeholder="Pranav"></div>
+        <label for="username">Username</label><input id="username" name="username" required minlength="3" maxlength="32" pattern="[A-Za-z0-9_.\-]+" autocomplete="username" placeholder="e.g. pranav" autocapitalize="none" spellcheck="false">
+        <label for="password">Password</label><div class="password-wrap"><input id="password" name="password" type="password" required minlength="12" maxlength="128" autocomplete="current-password" placeholder="Your password"><button id="show-password" type="button" aria-label="Show password">Show</button></div>
+        <p id="password-help" class="field-help" hidden>Use 12–128 characters. A memorable passphrase works well.</p><p id="auth-error" class="error" role="alert" hidden></p>
+        <button id="auth-submit" class="primary wide" type="submit">Sign in <span aria-hidden="true">↗</span></button>
+      </form>
+      <div class="local-note"><span class="shield-icon" aria-hidden="true">◆</span><p><strong>No cloud account or API key.</strong><br><span>Your account and work stay on this computer.</span></p></div>
+    </div>
+    <p class="auth-bottom">Local prototype · Application-level account separation</p>
+  </section>
+</main>
+
+<div id="workspace-view" class="shell" hidden>
+  <aside class="sidebar">
+    <a class="brand" href="/"><span class="brand-mark">A</span><span>aegis</span></a>
+    <div class="sidebar-product"><span class="status-dot"></span><div><strong>Local workbench</strong><small>Running on this computer</small></div></div>
+    <nav aria-label="Main navigation">
+      <p class="sidebar-label">WORKBENCH</p><button class="nav-item selected" id="home-button"><span aria-hidden="true">▦</span><span>My workspaces</span></button>
+      <div id="workspace-nav" hidden>
+        <p class="sidebar-label">CURRENT WORKSPACE</p>
+        <button class="nav-item workspace-nav-item selected" data-tab="overview"><span aria-hidden="true">⌂</span><span>Overview</span></button>
+        <button class="nav-item workspace-nav-item" data-tab="assistant"><span aria-hidden="true">✦</span><span>Assistant</span></button>
+        <button class="nav-item workspace-nav-item" data-tab="materials"><span aria-hidden="true">▤</span><span>Materials</span></button>
+        <button class="nav-item workspace-nav-item" data-tab="workflows"><span aria-hidden="true">↻</span><span>Workflows</span></button>
+        <button class="nav-item workspace-nav-item" data-tab="security"><span aria-hidden="true">◇</span><span>Offline status</span></button>
+      </div>
+      <button class="nav-item" id="admin-users" hidden><span aria-hidden="true">♙</span><span>Manage users</span></button>
+      <p class="sidebar-label">HELP</p><button class="nav-item" id="guide-button"><span aria-hidden="true">?</span><span>How to use Aegis</span></button><button class="nav-item" id="account-button"><span aria-hidden="true">○</span><span>Account & display</span></button>
+    </nav>
+    <div class="profile"><span id="avatar" class="avatar"></span><div><strong id="profile-name"></strong><span id="profile-username"></span><small id="profile-role"></small></div><button id="logout" class="icon-button" title="Sign out" aria-label="Sign out">↪</button></div>
+  </aside>
+
+  <main class="main-area">
+    <header class="topbar"><div><span class="topbar-kicker">AEGIS</span><span id="topbar-location">My workspaces</span></div><div class="topbar-state"><span class="status-dot"></span><span>Local only</span><span id="models-top-status" class="version">Checking models</span></div></header>
+    <div class="content">
+      <section id="workspace-list-view">
+        <div class="page-heading"><div><p id="workspace-eyebrow" class="eyebrow ink">YOUR PRIVATE WORK</p><h1 id="workspace-page-title">My workspaces</h1><p id="workspace-page-subtitle" class="muted">Separate materials, conversations and deliverables by project.</p></div><button id="new-workspace" class="primary">＋ New workspace</button></div>
+        <p id="workspace-error" class="error" role="alert" hidden></p><div class="section-label"><h2>Workspaces <span id="workspace-count">0</span></h2><span>Visible only to your account</span></div><div id="workspace-grid" class="workspace-grid"></div>
+        <section id="empty-state" class="empty-state"><span class="empty-icon" aria-hidden="true">▦</span><h2>Create your first workspace</h2><p>Use a separate workspace for each inspection, internal tool or document review.</p><button id="first-workspace" class="secondary">Create workspace <span aria-hidden="true">↗</span></button></section>
+      </section>
+
+      <section id="workspace-detail" hidden>
+        <div class="workspace-titlebar"><button id="back-workspaces" class="text-button">← All workspaces</button><div class="workspace-heading-row"><div><p class="eyebrow ink">PRIVATE WORKSPACE</p><h1 id="detail-name"></h1><p id="detail-description" class="muted"></p><p id="access-banner" class="access-banner" hidden></p></div><div id="workspace-actions" class="workspace-actions"><button id="rename-workspace" class="secondary" type="button">Edit details</button><button id="delete-workspace" class="danger-button" type="button">Delete workspace</button></div></div></div>
+        <div class="mobile-tabs" role="tablist" aria-label="Workspace sections"><button class="mobile-tab active" data-tab="overview">Overview</button><button class="mobile-tab" data-tab="assistant">Assistant</button><button class="mobile-tab" data-tab="materials">Materials</button><button class="mobile-tab" data-tab="workflows">Workflows</button><button class="mobile-tab" data-tab="security">Offline</button></div>
+
+        <section id="panel-overview" class="workspace-panel" data-panel="overview">
+          <div class="overview-grid">
+            <article class="welcome-card"><p class="eyebrow">WORKSPACE OVERVIEW</p><h2>Continue your confidential work.</h2><p>Add source material, ask a grounded question, or create a review pack from an inspection report.</p><div class="quick-actions"><button class="primary jump-action" data-tab="materials">Add materials</button><button class="secondary jump-action" data-tab="assistant">Ask Aegis</button></div></article>
+            <div class="metric-grid">
+              <article class="metric-card"><span class="metric-icon">▤</span><strong id="metric-documents">0</strong><p>Materials</p><small id="metric-read">0 ready for questions</small></article>
+              <article class="metric-card"><span class="metric-icon">✦</span><strong id="metric-answers">0</strong><p>Saved answers</p><small>Private to this workspace</small></article>
+              <article class="metric-card"><span class="metric-icon">↻</span><strong id="metric-runs">0</strong><p>Workflow runs</p><small id="metric-complete">0 completed</small></article>
+              <article class="metric-card"><span class="metric-icon">◇</span><strong id="metric-models">—</strong><p>Local models</p><small>Automatic task routing</small></article>
+            </div>
+          </div>
+          <div class="overview-columns">
+            <section class="surface"><div class="surface-heading"><div><p class="eyebrow ink">GET STARTED</p><h2>Recommended sequence</h2></div></div><ol class="sequence-list"><li><span>1</span><div><strong>Add project material</strong><p>Upload a PDF, image, text file or CSV.</p></div><button class="text-button jump-action" data-tab="materials">Open</button></li><li><span>2</span><div><strong>Read it locally</strong><p>Extract selectable text or use OCR for scans.</p></div><button class="text-button jump-action" data-tab="materials">Open</button></li><li><span>3</span><div><strong>Ask with sources</strong><p>Ground the answer in your read material.</p></div><button class="text-button jump-action" data-tab="assistant">Open</button></li><li><span>4</span><div><strong>Create deliverables</strong><p>Generate editable Word, Excel and PowerPoint drafts.</p></div><button class="text-button jump-action" data-tab="workflows">Open</button></li></ol></section>
+            <section class="surface activity-surface"><div class="surface-heading"><div><p class="eyebrow ink">RECENT ACTIVITY</p><h2>Latest workspace results</h2></div><button class="text-button jump-action" data-tab="workflows">View all</button></div><div id="overview-activity" class="activity-list"><p class="empty-copy">No activity yet. Add your first material to begin.</p></div></section>
+          </div>
+        </section>
+
+        <section id="panel-assistant" class="workspace-panel" data-panel="assistant" hidden>
+          <section class="assistant-panel">
+            <div class="assistant-heading"><div><p class="eyebrow ink">LOCAL ASSISTANT</p><h2>Ask Aegis</h2><p class="muted">The workbench selects a local model based on your request.</p></div><span id="models-status" class="version">CHECKING MODELS</span></div>
+            <div class="suggestion-row" aria-label="Example requests"><button type="button" class="suggestion">Summarize the key findings</button><button type="button" class="suggestion">Draft an approval note</button><button type="button" class="suggestion">Explain this calculation</button></div>
+            <form id="prompt-form" class="prompt-composer"><label for="task-prompt">Your request</label><textarea id="task-prompt" rows="5" maxlength="2000" required placeholder="Ask a question or describe the draft you need…"></textarea><div class="composer-footer"><label class="grounded-toggle"><input id="use-documents" type="checkbox" disabled><span><strong>Use workspace sources</strong><small id="source-readiness">Read material to enable source-grounded answers</small></span></label><button id="generate-button" class="primary" type="submit">Generate answer <span aria-hidden="true">↗</span></button></div></form>
+            <p id="generation-status" class="inline-status" role="status"></p><p id="generation-error" class="error" role="alert" hidden></p>
+          </section>
+          <section class="results-section"><div class="answer-toolbar"><div><h2>Saved answers <span id="answer-count">0</span></h2><p>Newest first · private to this workspace</p></div><div class="filter-pills" role="group" aria-label="Filter saved answers"><button type="button" class="filter-pill answer-filter active" data-answer-filter="all">All</button><button type="button" class="filter-pill answer-filter" data-answer-filter="sources">With sources</button><button type="button" class="filter-pill answer-filter" data-answer-filter="general">General</button></div></div><div id="generation-list"></div><div id="answer-empty" class="compact-empty"><span>✦</span><h3>No answers yet</h3><p>Ask Aegis for a draft, explanation or source-grounded answer.</p></div><div id="answer-no-match" class="compact-empty" hidden><span>⌕</span><h3>No answers in this view</h3><p>Choose another filter to see saved responses.</p></div></section>
+        </section>
+
+        <section id="panel-materials" class="workspace-panel" data-panel="materials" hidden>
+          <section class="upload-panel">
+            <div class="surface-heading"><div><p class="eyebrow ink">LOCAL KNOWLEDGE</p><h2>Materials</h2><p class="muted">Upload reports, notes, drawings, photos or structured readings.</p></div><button id="read-all" class="secondary">Read all unread files</button></div>
+            <label id="drop-zone" class="drop-zone" for="material-files"><span class="drop-icon">＋</span><strong>Drop files here or choose from this computer</strong><small>PDF, TXT, CSV, PNG or JPEG · Up to 20 MB each</small><span class="primary">Choose files</span></label><input id="material-files" type="file" multiple accept=".pdf,.txt,.csv,.png,.jpg,.jpeg" class="file-input">
+            <p id="upload-status" class="inline-status" role="status"></p><p id="upload-error" class="error" role="alert" hidden></p>
+            <div class="materials-toolbar"><div><h3>Workspace files</h3><span id="material-summary">0 files</span></div><span class="privacy-chip"><span class="status-dot"></span> Stored locally</span></div>
+            <div class="material-controls"><label class="search-box" for="material-search"><span aria-hidden="true">⌕</span><input id="material-search" type="search" placeholder="Search materials" autocomplete="off"></label><div class="filter-pills" role="group" aria-label="Filter materials"><button type="button" class="filter-pill active" data-material-filter="all">All</button><button type="button" class="filter-pill" data-material-filter="ready">Ready</button><button type="button" class="filter-pill" data-material-filter="unread">Unread</button></div></div>
+            <div id="document-list" class="document-list"></div><div id="material-no-match" class="compact-empty" hidden><span>⌕</span><h3>No matching materials</h3><p>Try another name or readiness filter.</p></div>
+          </section>
+        </section>
+
+        <section id="panel-workflows" class="workspace-panel" data-panel="workflows" hidden>
+          <section id="workflow-panel" class="assistant-panel">
+            <div class="surface-heading"><div><p class="eyebrow ink">TASK AUTOMATION</p><h2>Workflows & deliverables</h2><p class="muted">Follow each step, review the evidence, then download editable outputs.</p></div></div>
+            <div class="workflow-launchers"><article><span class="launcher-icon">▤</span><div><h3>Inspection review pack</h3><p>Start from a material’s <strong>Create review pack</strong> action. Aegis drafts a Word note, Excel register and PowerPoint briefing.</p></div><button class="secondary jump-action" data-tab="materials">Choose material</button></article><article><span class="launcher-icon">⌘</span><div><h3>Verified utility</h3><p>Generate a small function and check it against three independent examples inside an isolated runtime.</p></div><div class="utility-controls"><select id="code-utility" aria-label="Utility to build"><option value="temperature">Celsius to Fahrenheit</option><option value="sum_readings">Sum numeric readings</option></select><button id="run-code" class="primary">Generate & verify</button></div></article></div>
+            <p id="run-error" class="error" role="alert" hidden></p><div class="workflow-toolbar run-heading"><div><h2>Workflow history <span id="run-count">0</span></h2><p>Updates automatically while a task is running</p></div><div class="filter-pills" role="group" aria-label="Filter workflow history"><button type="button" class="filter-pill run-filter active" data-run-filter="all">All</button><button type="button" class="filter-pill run-filter" data-run-filter="running">Running</button><button type="button" class="filter-pill run-filter" data-run-filter="complete">Complete</button></div></div><div id="run-list"></div><div id="run-empty" class="compact-empty"><span>↻</span><h3>No workflows yet</h3><p>Create a review pack from Materials or verify a utility above.</p></div><div id="run-no-match" class="compact-empty" hidden><span>⌕</span><h3>No workflows in this view</h3><p>Choose another filter to see saved runs.</p></div>
+          </section>
+        </section>
+
+        <section id="panel-security" class="workspace-panel" data-panel="security" hidden>
+          <section class="security-hero"><div><p class="eyebrow">SOVEREIGN RUNTIME</p><h2>Offline status</h2><p>See what the prototype can currently prove about local processing.</p></div><div class="security-seal"><span class="status-dot"></span><strong>Local mode</strong><small>Loopback service</small></div></section>
+          <div class="security-grid"><article class="security-card"><span>01</span><h3>Application binding</h3><strong>127.0.0.1 only</strong><p>The workbench is available only from this computer.</p></article><article class="security-card"><span>02</span><h3>Model runtime</h3><strong>Local files</strong><p>Installed models run from this project with offline mode enabled.</p></article><article class="security-card"><span>03</span><h3>Code isolation</h3><strong>WebAssembly</strong><p>Verified utilities receive no host folders, environment variables or network grants.</p></article></div>
+          <section class="network-panel"><div class="surface-heading"><div><p class="eyebrow ink">LIVE OBSERVATION</p><h2>Connection monitor</h2></div><span id="network-badge" class="privacy-chip"><span class="status-dot"></span> Watching</span></div><p id="network-summary" class="network-summary">Loading observations…</p><p id="network-detail" class="field-help"></p><div class="evidence-note"><strong>Evidence boundary</strong><p>The live monitor samples the application and child processes. Very short connections may be missed until packet-capture evidence is completed.</p></div></section>
+        </section>
+      </section>
+      <footer class="workspace-footer">Aegis local prototype · Generated work requires human review</footer>
+    </div>
+  </main>
+</div>
+
+<dialog id="workspace-dialog"><form id="workspace-form"><div class="dialog-heading"><div><p id="workspace-dialog-eyebrow" class="eyebrow ink">NEW PROJECT SPACE</p><h2 id="workspace-dialog-title">New workspace</h2></div><button id="close-dialog" type="button" class="icon-button" aria-label="Close">×</button></div><p id="workspace-dialog-copy" class="muted">Keep one project’s materials, answers and deliverables together.</p><label for="workspace-name">Workspace name</label><input id="workspace-name" required maxlength="80" placeholder="e.g. Pump P-101 inspection"><label for="workspace-description">Description <span class="optional">optional</span></label><textarea id="workspace-description" maxlength="400" rows="3" placeholder="What are you reviewing or preparing?"></textarea><p id="create-error" class="error" role="alert" hidden></p><div class="dialog-actions"><button id="cancel-dialog" type="button" class="secondary">Cancel</button><button id="create-submit" class="primary" type="submit">Create workspace</button></div></form></dialog>
+<dialog id="delete-dialog" class="delete-dialog"><div class="dialog-heading"><div><p class="eyebrow ink">CONFIRM REMOVAL</p><h2 id="delete-title">Delete item?</h2></div><button id="close-delete" type="button" class="icon-button" aria-label="Close confirmation">×</button></div><p id="delete-copy" class="muted"></p><div id="delete-name-field"><label for="delete-name">Type the workspace name to confirm</label><input id="delete-name" autocomplete="off"><p class="field-help">This removes its materials, answers, workflow history and generated files.</p></div><p id="delete-error" class="error" role="alert" hidden></p><div class="dialog-actions"><button id="cancel-delete" type="button" class="secondary">Keep it</button><button id="confirm-delete" type="button" class="danger-button">Delete permanently</button></div></dialog>
+<dialog id="source-dialog" class="source-dialog"><div class="dialog-heading sticky-dialog-heading"><div><p class="eyebrow ink">EXTRACTED EVIDENCE</p><h2>Source document</h2></div><button id="close-source" class="icon-button" aria-label="Close source">×</button></div><div id="source-pages"></div></dialog>
+<dialog id="guide-dialog" class="guide-dialog"><div class="dialog-heading"><div><p class="eyebrow ink">QUICK GUIDE</p><h2>Complete a task in four steps</h2></div><button id="close-guide" class="icon-button" aria-label="Close guide">×</button></div><p class="muted">Everything below runs through the local workbench.</p><ol class="guide-steps"><li><span>1</span><div><strong>Create or open a workspace</strong><p>Each workspace keeps one project’s material, answers and outputs together.</p></div></li><li><span>2</span><div><strong>Add and read materials</strong><p>Use OCR for scans, then check extracted text against the original page.</p></div></li><li><span>3</span><div><strong>Ask with workspace sources</strong><p>Enable source mode to ground the response and open page references.</p></div></li><li><span>4</span><div><strong>Run a workflow</strong><p>Create an editable review pack or generate and verify a small utility.</p></div></li></ol><div class="dialog-actions"><button id="guide-start" class="primary">Got it</button></div></dialog>
+<dialog id="account-dialog"><div class="dialog-heading"><div><p class="eyebrow ink">LOCAL ACCOUNT</p><h2>Account & display</h2></div><button id="close-account" class="icon-button" aria-label="Close account settings">×</button></div><div class="account-summary"><span id="account-avatar" class="avatar"></span><div><strong id="account-display"></strong><p id="account-username"></p></div></div><div class="setting-row"><div><strong>Compact workspace layout</strong><p>Reduce spacing to show more information on screen.</p></div><label class="switch"><input id="compact-mode" type="checkbox"><span></span></label></div><p class="field-help">This display choice is saved only in this browser.</p><div class="dialog-actions"><button id="account-logout" class="secondary">Sign out</button><button id="account-done" class="primary">Done</button></div></dialog>
+<dialog id="users-dialog" class="users-dialog"><div class="dialog-heading"><div><p class="eyebrow ink">ADMINISTRATION</p><h2>Users and roles</h2></div><button id="close-users" class="icon-button" aria-label="Close user management">×</button></div><p class="muted">Change which portal each local account can use. Your own Administrator role is protected.</p><p id="users-error" class="error" role="alert" hidden></p><div class="role-legend"><span><b>User</b> Own workspaces</span><span><b>Supervisor</b> Read-only team review</span><span><b>Administrator</b> All access and role management</span></div><div id="users-list" class="users-list"></div></dialog>
+<div id="toast" class="toast" role="status" hidden></div>
+</body>
+</html>
