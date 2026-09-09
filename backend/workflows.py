@@ -3,6 +3,9 @@ from threading import Thread,Lock
 import json,time,uuid,re,io,base64,ast
 from fastapi import Request,HTTPException
 from fastapi.responses import FileResponse
+from fastapi.responses import Response
+from urllib.parse import quote
+from backend import vault
 from pydantic import BaseModel,Field
 from PIL import Image
 from backend.documents import extract,retrieve,context_for
@@ -114,11 +117,12 @@ def install(app,database,identity,owned_workspace,engine,db_path,upload_dir):
         return pages
     def records(workspace):
         with database() as con:
-            return [dict(r) for r in con.execute('''SELECT p.document_id,p.page,p.text,d.filename
+            from backend.injection import screen_records
+            return screen_records([dict(r) for r in con.execute('''SELECT p.document_id,p.page,p.text,d.filename
                 FROM pages p JOIN documents d ON p.document_id=d.id
                 JOIN workspaces w ON w.id=d.workspace_id LEFT JOIN document_metadata m ON m.document_id=d.id
                 WHERE d.workspace_id=? OR COALESCE(m.kind,'report')='reference' AND w.owner_id IN (SELECT id FROM users WHERE role='administrator')
-                ORDER BY CASE WHEN COALESCE(m.kind,'report')='reference' THEN 0 ELSE 1 END,d.created_at DESC,p.page LIMIT 600''',(workspace,)).fetchall()]
+                ORDER BY CASE WHEN COALESCE(m.kind,'report')='reference' THEN 0 ELSE 1 END,d.created_at DESC,p.page LIMIT 600''',(workspace,)).fetchall()])
     def save_answer(workspace,prompt,result):
         ident=str(uuid.uuid4());now=int(time.time())
         with database() as con:con.execute('INSERT INTO generations VALUES (?,?,?,?,?)',(ident,workspace,prompt,json.dumps(result),now))
@@ -133,6 +137,7 @@ def install(app,database,identity,owned_workspace,engine,db_path,upload_dir):
             con.execute('UPDATE runs SET events=?,status=?,result=? WHERE id=?',(json.dumps(events),status or row['status'],json.dumps(result) if result is not None else row['result'],run))
     def attach(run,workspace,path):
         ident=str(uuid.uuid4())
+        if vault.enabled(path):vault.seal(path)
         with database() as con:con.execute('INSERT INTO artifacts VALUES (?,?,?,?,?)',(ident,workspace,run,path.name,str(path.relative_to(data))))
         return {'id':ident,'filename':path.name}
     def create_run(workspace,kind,work):
@@ -161,7 +166,7 @@ def install(app,database,identity,owned_workspace,engine,db_path,upload_dir):
     def page_image(document_id:str,page:int,request:Request):
         owned_doc(document_id,identity(request));path=previews/f'{document_id}-{page}.png'
         if not path.is_file():raise HTTPException(404,'Page image unavailable. Read the document first.')
-        return FileResponse(path,media_type='image/png')
+        return Response(vault.read_bytes(path),media_type='image/png')
 
     @app.post('/api/workspaces/{workspace_id}/questions',status_code=201)
     def question(workspace_id:str,body:Question,request:Request):
@@ -204,7 +209,7 @@ def install(app,database,identity,owned_workspace,engine,db_path,upload_dir):
         doc=owned_doc(document_id,identity(request,True),True);path=previews/f'{document_id}-1.png'
         if not path.exists():read_doc(doc)
         if not path.exists():raise HTTPException(422,'Vision requires an image or PDF page.')
-        with Image.open(path) as image:
+        with Image.open(io.BytesIO(vault.read_bytes(path))) as image:
             image.thumbnail((768,768));buffer=io.BytesIO();image.convert('RGB').save(buffer,format='JPEG')
         prompt='Describe the visible content in this image. Do not infer safety, hidden connections or unreadable measurements.'
         try:result=engine.generate(prompt,image='data:image/jpeg;base64,'+base64.b64encode(buffer.getvalue()).decode())
@@ -296,4 +301,4 @@ def install(app,database,identity,owned_workspace,engine,db_path,upload_dir):
         if not row:raise HTTPException(404,'Artifact not found.')
         path=(data/row['path']).resolve()
         if not path.is_relative_to(artifacts.resolve()) or not path.is_file():raise HTTPException(404,'Artifact unavailable.')
-        return FileResponse(path,filename=row['filename'],media_type='application/octet-stream')
+        return Response(vault.read_bytes(path),headers={'Content-Disposition':"attachment; filename*=UTF-8''"+quote(row['filename'])},media_type='application/octet-stream')

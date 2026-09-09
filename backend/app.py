@@ -11,10 +11,15 @@ import uuid
 import os
 
 from backend.local_models import LocalModels, ModelUnavailable, ModelBusy
+from backend.security import scan_upload, UnsafeUpload
+from backend import vault
+from backend.review_integrity import snapshot
 from argon2 import PasswordHasher
 from argon2.exceptions import VerificationError, InvalidHashError
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import Response
+from urllib.parse import quote
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, ConfigDict, field_validator
 from starlette.middleware.trustedhost import TrustedHostMiddleware
@@ -83,6 +88,9 @@ def create_app(db_path=None, model_engine=None):
 
     @contextmanager
     def database():
+        if vault.enabled(db_path):
+            with vault.database(db_path) as con:yield con
+            return
         con = sqlite3.connect(db_path, timeout=10)
         con.row_factory = sqlite3.Row
         con.execute('PRAGMA foreign_keys=ON')
@@ -115,6 +123,11 @@ def create_app(db_path=None, model_engine=None):
           document_id TEXT PRIMARY KEY REFERENCES documents(id),
           kind TEXT NOT NULL DEFAULT 'report' CHECK(kind IN ('reference','report'))
         );
+        CREATE TABLE IF NOT EXISTS document_security (
+          document_id TEXT PRIMARY KEY REFERENCES documents(id),
+          status TEXT NOT NULL, findings TEXT NOT NULL,
+          scanner_version TEXT NOT NULL, scanned_at INTEGER NOT NULL
+        );
         CREATE TABLE IF NOT EXISTS review_requests (
           id TEXT PRIMARY KEY, run_id TEXT NOT NULL UNIQUE REFERENCES runs(id),
           workspace_id TEXT NOT NULL REFERENCES workspaces(id),
@@ -124,6 +137,10 @@ def create_app(db_path=None, model_engine=None):
           created_at INTEGER NOT NULL, analysed_at INTEGER, decided_at INTEGER
         );
         CREATE INDEX IF NOT EXISTS idx_review_requests_workspace ON review_requests(workspace_id,status,created_at);
+        CREATE TABLE IF NOT EXISTS review_versions (
+          review_id TEXT PRIMARY KEY REFERENCES review_requests(id), digest TEXT NOT NULL,
+          snapshot TEXT NOT NULL, reviewer_id TEXT NOT NULL REFERENCES users(id), created_at INTEGER NOT NULL
+        );
         CREATE TABLE IF NOT EXISTS generations (
           id TEXT PRIMARY KEY, workspace_id TEXT NOT NULL REFERENCES workspaces(id),
           prompt TEXT NOT NULL, result TEXT NOT NULL, created_at INTEGER NOT NULL);
@@ -135,6 +152,7 @@ def create_app(db_path=None, model_engine=None):
         user_columns={row['name'] for row in con.execute('PRAGMA table_info(users)').fetchall()}
         if 'role' not in user_columns:
             con.execute("ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'user'")
+        con.execute("UPDATE review_requests SET status='pending_analysis' WHERE status='pending_approval' AND id NOT IN (SELECT review_id FROM review_versions)")
 
     from backend.network import Monitor
     monitor=Monitor(db_path.parent/'network-observation.json')
@@ -355,8 +373,17 @@ def create_app(db_path=None, model_engine=None):
         user=identity(request,True)
         if user['role'] not in ('supervisor','administrator'):raise HTTPException(403,'Supervisor or Administrator review access required.')
         with database() as con:
+            con.execute('BEGIN IMMEDIATE')
             row=con.execute('SELECT * FROM review_requests WHERE id=?',(request_id,)).fetchone()
             if not row:raise HTTPException(404,'Review request not found.')
+            try:digest,payload=snapshot(con,row,db_path.parent)
+            except (ValueError,OSError) as exc:raise HTTPException(409,'Review evidence unavailable or changed; generate a new analysis.') from exc
+            if body.action=='analyse' and row['status']=='pending_analysis':
+                con.execute('INSERT INTO review_versions VALUES (?,?,?,?,?)',(request_id,digest,payload,user['id'],int(time.time())))
+            elif body.action in ('approve','disapprove'):
+                version=con.execute('SELECT * FROM review_versions WHERE review_id=?',(request_id,)).fetchone()
+                if not version or version['digest']!=digest:raise HTTPException(409,'Report, sources or AI output changed. A new analysis and review are required.')
+                if version['reviewer_id']!=user['id']:raise HTTPException(409,'The supervisor who recorded analysis must record this decision.')
             now=int(time.time());action=body.action;new_status=None
             if action=='analyse' and row['status']=='pending_analysis':new_status='pending_approval'
             elif action=='approve' and row['status']=='pending_approval':new_status='approved'
@@ -422,6 +449,7 @@ def create_app(db_path=None, model_engine=None):
             artifact_paths=[row['path'] for row in con.execute('SELECT path FROM artifacts WHERE workspace_id=?',(workspace_id,)).fetchall()]
             for document_id in document_ids:
                 con.execute('DELETE FROM pages WHERE document_id=?',(document_id,))
+                con.execute('DELETE FROM document_security WHERE document_id=?',(document_id,))
                 con.execute('DELETE FROM document_metadata WHERE document_id=?',(document_id,))
             con.execute('DELETE FROM artifacts WHERE workspace_id=?',(workspace_id,))
             con.execute('DELETE FROM runs WHERE workspace_id=?',(workspace_id,))
@@ -449,8 +477,10 @@ def create_app(db_path=None, model_engine=None):
             raise HTTPException(422, 'Document kind must be reference or report.')
         with database() as con:
             rows = con.execute('''SELECT DISTINCT d.*,COALESCE(m.kind,'report') AS kind,
+                COALESCE(ds.status,'legacy_unscanned') AS scan_status,ds.scanner_version,ds.scanned_at,
                 EXISTS(SELECT 1 FROM pages p WHERE p.document_id=d.id) AS extracted
                 FROM documents d JOIN workspaces dw ON dw.id=d.workspace_id LEFT JOIN document_metadata m ON m.document_id=d.id
+                LEFT JOIN document_security ds ON ds.document_id=d.id
                 JOIN users owners ON owners.id=dw.owner_id
                 WHERE ((d.workspace_id=? AND (?='all' OR COALESCE(m.kind,'report')=?))
                     OR (? IN ('all','reference') AND COALESCE(m.kind,'report')='reference' AND owners.role='administrator'))
@@ -502,6 +532,16 @@ def create_app(db_path=None, model_engine=None):
                     valid = False
             if not valid:
                 raise HTTPException(415, 'The contents do not match this file type. Text and CSV files must use UTF-8.')
+            try:
+                scan=scan_upload(temporary,suffix)
+                if (db_path.parent/'.require-antivirus').exists():
+                    from backend.antivirus import defender_scan
+                    try:scan['findings'].append(defender_scan(temporary))
+                    except RuntimeError as exc:raise UnsafeUpload(str(exc)) from exc
+            except UnsafeUpload as exc:
+                with database() as con:
+                    con.execute('INSERT INTO audit_events(user_id,action,created_at) VALUES (?,?,?)',(user['id'],f'upload_blocked:{filename[:80]}',int(time.time())))
+                raise HTTPException(422,str(exc))
             item = {'id':document_id,'workspace_id':workspace_id,'filename':filename,'size':size,'sha256':digest.hexdigest(),'created_at':int(time.time())}
             with database() as con:
                 con.execute('BEGIN IMMEDIATE')
@@ -509,10 +549,12 @@ def create_app(db_path=None, model_engine=None):
                 if total + size > 200 * 1024 * 1024:
                     raise HTTPException(413, 'This workspace has reached its 200 MB storage limit.')
                 os.replace(temporary, destination)
+                if vault.enabled(destination):vault.seal(destination)
                 con.execute('INSERT INTO documents VALUES (?,?,?,?,?,?)', tuple(item.values()))
                 con.execute('INSERT INTO document_metadata(document_id,kind) VALUES (?,?)',(document_id,kind))
+                con.execute('INSERT INTO document_security VALUES (?,?,?,?,?)',(document_id,scan['status'],__import__('json').dumps(scan['findings']),scan['scanner_version'],int(time.time())))
                 con.execute('INSERT INTO audit_events(user_id,action,created_at) VALUES (?,?,?)', (user['id'], 'document_uploaded', int(time.time())))
-            return item
+            return {**item,'scan_status':scan['status'],'scanner_version':scan['scanner_version']}
         except BaseException:
             temporary.unlink(missing_ok=True)
             destination.unlink(missing_ok=True)
@@ -532,7 +574,7 @@ def create_app(db_path=None, model_engine=None):
         path = upload_dir / row['id']
         if not path.is_file():
             raise HTTPException(404, 'The stored file is unavailable.')
-        return FileResponse(path, media_type='application/octet-stream', filename=row['filename'])
+        return Response(vault.read_bytes(path),media_type='application/octet-stream',headers={'Content-Disposition':"attachment; filename*=UTF-8''"+quote(row['filename'])})
 
     @app.delete('/api/documents/{document_id}')
     def delete_document(document_id: str, request: Request):
@@ -550,6 +592,7 @@ def create_app(db_path=None, model_engine=None):
             if referenced:
                 raise HTTPException(409, 'Wait for the active workflow to finish before deleting this material.')
             con.execute('DELETE FROM pages WHERE document_id=?',(document_id,))
+            con.execute('DELETE FROM document_security WHERE document_id=?',(document_id,))
             con.execute('DELETE FROM document_metadata WHERE document_id=?',(document_id,))
             con.execute('DELETE FROM documents WHERE id=?',(document_id,))
             con.execute('INSERT INTO audit_events(user_id,action,created_at) VALUES (?,?,?)',

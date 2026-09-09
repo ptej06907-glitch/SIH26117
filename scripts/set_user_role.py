@@ -1,6 +1,9 @@
 import argparse
 import sqlite3
 from pathlib import Path
+import sys
+sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
+from backend import vault
 
 
 parser=argparse.ArgumentParser(description='Assign an Aegis local account role.')
@@ -12,7 +15,7 @@ args=parser.parse_args()
 database=Path(args.database).resolve()
 if not database.is_file():
     raise SystemExit(f'Database not found: {database}')
-with sqlite3.connect(database) as con:
+with (vault.database(database) if vault.enabled(database) else sqlite3.connect(database)) as con:
     columns={row[1] for row in con.execute('PRAGMA table_info(users)')}
     if 'role' not in columns:
         con.execute("ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'user'")

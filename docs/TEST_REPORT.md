@@ -88,3 +88,19 @@ This is backend/integration and source validation, not an assertion of comprehen
 - Increased supported PDF length from 20 to 100 pages per document.
 - Preserved the 20 MB file-size limit and existing OCR/page-rendering safeguards.
 - Updated the extraction error message to state the 100-page limit.
+
+## Security controls milestone — 2026-09-09
+
+- Confirmed eight-hour session expiry and expired-session rejection.
+- Confirmed bounded Pydantic validation for credentials, roles, workspaces, prompts, review actions and notes, plus upload signature, filename and quota checks.
+- Confirmed authentication rate limiting at ten attempts per client address per rolling minute.
+- Confirmed the Python outbound guard allows loopback only and records blocked attempts.
+- Added a network-observation regression test covering loopback policy and the explicit non-packet-capture boundary.
+- Full suite: 38 tests passed with two upstream dependency deprecation warnings.
+
+## Upload security scanning milestone — 2026-09-09
+
+- Added pre-persistence scanning for malware-test signatures, disguised executables, active/embedded PDF content, malformed PDFs and images, unsafe image dimensions and binary text payloads.
+- Clean documents receive a persisted scan record; rejected uploads produce an audit event and leave no document bytes behind.
+- Added regression coverage for a harmless injected test signature and an active-PDF payload.
+- Full suite: 39 tests passed with two upstream dependency deprecation warnings.

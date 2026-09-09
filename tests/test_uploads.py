@@ -22,9 +22,11 @@ def test_upload_list_download_persistence(env):
     result=upload(c,w,'measurements.csv',data)
     assert result.status_code==201,result.text
     item=result.json()
+    assert item['scan_status']=='clean'
     assert item['sha256']==hashlib.sha256(data).hexdigest()
     assert item['size']==len(data)
     assert c.get(f'/api/workspaces/{w}/documents').json()['documents'][0]['id']==item['id']
+    assert c.get(f'/api/workspaces/{w}/documents').json()['documents'][0]['scan_status']=='clean'
     downloaded=c.get(f"/api/documents/{item['id']}/download")
     assert downloaded.content==data
     assert 'attachment' in downloaded.headers['content-disposition']
@@ -71,6 +73,17 @@ def test_same_name_does_not_overwrite(env):
     assert first!=second
     assert c.get(f'/api/documents/{first}/download').content==b'First'
     assert c.get(f'/api/documents/{second}/download').content==b'Second'
+
+def test_security_scan_blocks_signature_and_active_pdf(env,monkeypatch):
+    c,app,path,w=env
+    import backend.security as security
+    monkeypatch.setattr(security,'EICAR_MARKER',b'HARMLESS-TEST-SIGNATURE')
+    assert upload(c,w,'signature.txt',b'HARMLESS-TEST-SIGNATURE').status_code==422
+    active_pdf=b'%PDF-1.4\n1 0 obj <</OpenAction 2 0 R /JavaScript (alert)>> endobj\n%%EOF'
+    assert upload(c,w,'active.pdf',active_pdf).status_code==422
+    assert not list((path.parent/'uploads').iterdir())
+    with sqlite3.connect(path) as db:
+        assert db.execute("SELECT COUNT(*) FROM audit_events WHERE action LIKE 'upload_blocked:%'").fetchone()[0]==2
 
 def test_remove_document_deletes_record_file_and_extracted_pages(env):
     c,app,path,w=env

@@ -20,6 +20,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from backend.app import ROOT, create_app
 from backend.documents import extract
+from backend import vault
 
 
 CORPUS = (
@@ -44,7 +45,7 @@ def main() -> int:
     create_app(db_path, model_engine=None)
     upload_dir = db_path.parent / "uploads"
     preview_dir = db_path.parent / "previews"
-    with sqlite3.connect(db_path) as con:
+    with (vault.database(db_path) if vault.enabled(db_path) else sqlite3.connect(db_path)) as con:
         con.row_factory = sqlite3.Row
         user = con.execute("SELECT id,username FROM users WHERE username=?", (args.username.lower(),)).fetchone()
         if not user:
@@ -78,6 +79,7 @@ def main() -> int:
             destination = upload_dir / document_id
             destination.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(source, destination)
+            if vault.enabled(destination):vault.seal(destination)
             con.execute(
                 "INSERT INTO documents VALUES (?,?,?,?,?,?)",
                 (document_id, workspace_id, stored_name, len(content), digest, int(time.time())),

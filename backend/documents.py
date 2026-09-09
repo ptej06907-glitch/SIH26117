@@ -3,6 +3,7 @@ from pathlib import Path
 import re, threading, io
 import pymupdf
 from PIL import Image
+from backend import vault
 
 OCR_LOCK=threading.Lock()
 OCR=None
@@ -24,11 +25,11 @@ def extract(path,filename,preview_dir,document_id):
     suffix=Path(filename).suffix.lower();preview_dir=Path(preview_dir);preview_dir.mkdir(parents=True,exist_ok=True)
     pages=[]
     if suffix in {'.txt','.csv'}:
-        text=Path(path).read_text(encoding='utf-8-sig')
+        text=vault.read_bytes(path).decode('utf-8-sig')
         if len(text)>120000:raise ValueError('Text extraction is limited to 120,000 characters per file.')
         pages=[{'page':1,'text':text,'method':'text','warnings':[],'lines':[]}]
     elif suffix=='.pdf':
-        with pymupdf.open(path) as pdf:
+        with pymupdf.open(stream=vault.read_bytes(path),filetype='pdf') as pdf:
             if pdf.needs_pass:raise ValueError('Password-protected PDFs are not supported.')
             if len(pdf)>PDF_PAGE_LIMIT:raise ValueError(f'Use a PDF with {PDF_PAGE_LIMIT} pages or fewer for this prototype.')
             for index,page in enumerate(pdf):
@@ -36,7 +37,7 @@ def extract(path,filename,preview_dir,document_id):
                 scale=min(2.0,1800/max(page.rect.width,page.rect.height))
                 pix=page.get_pixmap(matrix=pymupdf.Matrix(scale,scale),alpha=False)
                 image=Image.open(io.BytesIO(pix.tobytes('png')))
-                image.save(preview_dir/f'{document_id}-{index+1}.png')
+                buffer=io.BytesIO();image.save(buffer,format='PNG');vault.write_bytes(preview_dir/f'{document_id}-{index+1}.png',buffer.getvalue())
                 lines=[];method='pdf_text'
                 if len(text.strip())<30:text,lines=ocr_image(image);method='ocr'
                 warnings=[]
@@ -44,8 +45,8 @@ def extract(path,filename,preview_dir,document_id):
                 if method=='ocr':warnings.append('OCR may misread measurements, identifiers and handwriting. Check the original page.')
                 pages.append({'page':index+1,'text':text[:12000],'method':method,'warnings':warnings,'lines':lines})
     else:
-        with Image.open(path) as image:
-            image.load();image.thumbnail((1800,1800));image.convert('RGB').save(preview_dir/f'{document_id}-1.png')
+        with Image.open(io.BytesIO(vault.read_bytes(path))) as image:
+            image.load();image.thumbnail((1800,1800));buffer=io.BytesIO();image.convert('RGB').save(buffer,format='PNG');vault.write_bytes(preview_dir/f'{document_id}-1.png',buffer.getvalue())
             text,lines=ocr_image(image)
         pages=[{'page':1,'text':text[:12000],'method':'ocr','warnings':['OCR text requires review; empty text does not mean an empty image.'],'lines':lines}]
     return pages
@@ -54,6 +55,8 @@ STOP={'the','a','an','is','are','of','to','and','in','for','this','that','what',
 def tokens(text):return set(re.findall(r'[a-z0-9][a-z0-9_-]{1,}',text.lower()))-STOP
 
 def retrieve(records,query,limit=3):
+    from backend.injection import screen_records
+    records=screen_records(records)
     wanted=tokens(query);scored=[]
     for record in records:
         text=record['text']

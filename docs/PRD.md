@@ -1,5 +1,9 @@
 # Aegis — Local Industrial AI Workbench
 
+## Current security update — 2026-09-09
+
+Implemented Windows-user-bound DPAPI storage for the database, uploads, page previews and artifacts; mandatory Windows Defender scanning when the deployment marker is enabled; conservative prompt-injection screening of retrieved pages; and persisted approval snapshots that reject changes to report/source bytes, AI results or artifacts between analysis and decision. See `SECURITY_IMPLEMENTATION.md` for activation, migration, recovery, test coverage and exact limits. These current details supersede earlier plaintext-storage and missing-antivirus statements below. The application remains a workstation prototype, not a certified air gap or production-hardened deployment.
+
 Problem statement: SIH26117, MRPL. Updated: 2026-09-08.
 
 ## Product objective
@@ -200,6 +204,12 @@ Completed inspection workflows now create a persisted review request. Users see 
 
 ### Feature 20 — Automatic queueing after Assistant incident analysis (complete, 2026-09-08)
 When a User or Supervisor submits a source-grounded Assistant analysis tied to an incident report, the completed analysis now automatically creates a Supervisor review request. The request is inserted into the review queue without requiring a separate review-pack click. The Assistant status confirms that the analysis was sent to the Supervisor queue, while the workspace review panel polls for updated analysis, approval or disapproval state. Inspection review workflows continue to create requests as well, so both analysis entry paths share the same human approval gate.
+
+### Feature 21 — Security controls hardening (complete, 2026-09-09)
+The prototype security baseline is now documented and regression-tested without changing the dashboard UI. Sessions expire after eight hours and expired records are rejected. Pydantic request models enforce bounded lengths, allowed role/portal values, workspace fields, prompts, workflow actions and review notes; uploads separately enforce safe names, accepted formats, signatures and byte quotas. Authentication attempts are rate-limited to ten attempts per client address per rolling minute. The Python network guard blocks non-loopback socket destinations, while the basic monitor samples the application and descendants, records blocked attempts and external peers, persists observations locally and explicitly labels the result as connection snapshots rather than packet capture. These controls reduce unauthorized access and accidental egress risk; they do not constitute a certified air gap or replace host-level firewall, encryption-at-rest and enterprise security controls.
+
+### Feature 22 — Local upload security scanning (complete, 2026-09-09)
+Every newly uploaded User or Administrator document is scanned locally before it is admitted to the document library. The scanner rejects the standard antivirus-test signature, executable file headers disguised as documents, active PDF JavaScript and launch actions, embedded PDF payloads, rich-media PDF content, password-protected or malformed PDFs, excessive PDF links, malformed images, images above the safe pixel limit and binary content disguised as text. Clean scan status, scanner version and timestamp are stored in `document_security`; blocked attempts are written to the audit log and temporary bytes are removed. Existing files created before this feature are labelled `legacy_unscanned` until re-uploaded or migrated. This is a bounded application scanner, not a replacement for an enterprise antivirus engine or content-disarm-and-reconstruction gateway.
 
 ---
 
