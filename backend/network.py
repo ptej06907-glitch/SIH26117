@@ -2,6 +2,7 @@
 import socket,ipaddress,time,threading,os,json
 from pathlib import Path
 import psutil
+from backend import vault
 ATTEMPTS=[]
 INSTALLED=False
 
@@ -49,7 +50,7 @@ class Monitor:
                     except (psutil.AccessDenied,psutil.NoSuchProcess):self.record['observation_errors']+=1
                 self.record.update(samples=self.record['samples']+1,last_sample=int(time.time()),connections=rows,blocked_python_attempts=list(ATTEMPTS))
                 self.path.parent.mkdir(parents=True,exist_ok=True)
-                self.path.write_text(json.dumps(self.record,indent=2))
+                vault.write_bytes(self.path,json.dumps(self.record,indent=2).encode('utf-8'))
             except Exception:self.record['observation_errors']+=1
             self.stop_event.wait(.5)
     def close(self):

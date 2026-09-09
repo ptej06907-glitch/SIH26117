@@ -4,13 +4,13 @@
 
 Implemented Windows-user-bound DPAPI storage for the database, uploads, page previews and artifacts; mandatory Windows Defender scanning when the deployment marker is enabled; conservative prompt-injection screening of retrieved pages; and persisted approval snapshots that reject changes to report/source bytes, AI results or artifacts between analysis and decision. See `SECURITY_IMPLEMENTATION.md` for activation, migration, recovery, test coverage and exact limits. These current details supersede earlier plaintext-storage and missing-antivirus statements below. The application remains a workstation prototype, not a certified air gap or production-hardened deployment.
 
-Problem statement: SIH26117, MRPL. Updated: 2026-09-08.
+Problem statement: SIH26117, MRPL. Updated: 2026-09-09.
 
 ## Product objective
 Deliver an on-premise assistant for confidential knowledge work: automatic selection of local open-weight models, multi-step tool use, document grounding, multimodal inputs, real deliverables, and independently observable offline behavior.
 
 ## Current milestone
-**User-facing dashboard and core end-to-end prototype complete; 37 automated tests passed.**
+**User-facing dashboard, core end-to-end prototype and security hardening complete; 47 automated tests passed.**
 
 The prototype now covers the required demonstration path from local sign-in and material upload through OCR, source-grounded assistance, multimodal interpretation, agent workflow execution, editable deliverables, sandboxed code verification and visible connection observations. Packet-level capture, production hardening and engineering validation remain outside the completed prototype claim.
 
@@ -40,7 +40,7 @@ The prototype now covers the required demonstration path from local sign-in and 
 - Word, Excel and PowerPoint files are generated as outputs but are not accepted as source uploads yet.
 - Material and workspace deletion controls are not present.
 - Retrieval is lexical and designed for the demonstration collection rather than a large enterprise corpus.
-- The database is not application-encrypted, and a Windows administrator can access workstation files.
+- Protected application data is encrypted with Windows DPAPI and bound to the deployment account. A process or administrator operating as that account remains inside this protection boundary.
 - Password recovery, administrator provisioning, invitations and enterprise SSO are not included.
 - Connection snapshots can miss short-lived traffic; the attempted host packet-capture proof is not yet complete.
 - Generated text, OCR, vision output, calculations and engineering interpretations require human review.
@@ -102,7 +102,7 @@ Users → sessions; users → workspaces; users → local audit events. Foreign 
 
 ## Limitations and unresolved requirements
 - Application-level separation does not protect data from the Windows account owner/administrator.
-- Database is not encrypted by the application.
+- The database, uploads, previews, artifacts and persisted network observation are encrypted with Windows DPAPI when the deployment marker is active. Model runtime logs and temporary upload/artifact staging remain outside this coverage.
 - Password recovery, administrator provisioning, invitations, and enterprise SSO are deferred.
 - Exact concurrency meaning of 'multiple models at once' is unresolved.
 - OCR/vision accuracy, acceptable latency, and engineering-drawing depth are unmeasured.

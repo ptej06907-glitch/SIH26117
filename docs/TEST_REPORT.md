@@ -104,3 +104,13 @@ This is backend/integration and source validation, not an assertion of comprehen
 - Clean documents receive a persisted scan record; rejected uploads produce an audit event and leave no document bytes behind.
 - Added regression coverage for a harmless injected test signature and an active-PDF payload.
 - Full suite: 39 tests passed with two upstream dependency deprecation warnings.
+
+## Security hardening milestone — 2026-09-09
+
+- Added Windows-user-bound DPAPI encryption for the SQLite database, uploads, page previews, generated artifacts and persisted network-observation snapshots.
+- Migrated and verified the live data store. All 9 existing document hashes match after decryption; three role accounts and the existing completed review remain present.
+- Added mandatory Windows Defender custom scanning for new uploads on the live deployment, with fail-closed handling for unavailable, failed or timed-out scans.
+- Added prompt-injection screening for retrieved document pages and explicit untrusted-evidence instructions for text and vision models.
+- Added immutable review snapshots covering AI results, source/report bytes and artifact bytes; approval is rejected if evidence changes after analysis.
+- Full suite: 47 tests passed with two upstream dependency deprecation warnings. A focused post-migration security run passed 21 tests.
+- Live encrypted startup check: `/api/health` returned `status: ok` and `database: connected` with all three local model roles installed.
