@@ -4,18 +4,148 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#f4f3f1">
-  <meta name="description" content="Aegis is a private, on-premise AI workbench for industrial knowledge work.">
-  <title>Aegis · Local workbench</title>
+  <meta name="description" content="ARK — Autonomous Refinery Knowledge. A sovereign, on-premise workbench for industrial knowledge work.">
+  <title>ARK · Autonomous Refinery Knowledge</title>
   <link rel="stylesheet" href="/assets/style.css">
   <link rel="stylesheet" href="/assets/ark-ui.css">
+  <link rel="stylesheet" href="/assets/ark-cinematic.css">
+  <script src="/assets/ark-landing.js" defer></script>
   <script src="/assets/app.js" defer></script>
 </head>
 <body>
-<div id="boot" role="status"><span class="boot-mark">A</span><span>Opening Aegis…</span></div>
+<div id="boot" role="status" aria-live="polite">
+  <span class="boot-mark">A</span>
+  <div><strong>ARK</strong><span>AUTONOMOUS REFINERY KNOWLEDGE</span></div>
+  <p id="boot-status">Establishing local runtime</p>
+</div>
+
+<main id="landing-view" class="ark-landing" aria-label="ARK system introduction" hidden>
+  <header class="ark-landing-header">
+    <a class="ark-wordmark" href="#ark-01" aria-label="ARK introduction"><span>A</span><strong>ARK</strong><small>AUTONOMOUS REFINERY KNOWLEDGE</small></a>
+    <div class="ark-header-meta"><span>MRPL · SMART AUTOMATION</span><span>SIH 26117</span></div>
+    <button id="ark-enter-header" class="ark-enter-link" type="button">ENTER WORKBENCH <span>↗</span></button>
+  </header>
+
+  <div id="ark-scenes" class="ark-scenes">
+    <section id="ark-01" class="ark-scene is-active" data-ark-scene="0" aria-label="01 ARK Arrival">
+      <div class="ark-scene-inner ark-arrival">
+        <div class="ark-scene-copy">
+          <p class="ark-index">01 / 10 · ARRIVAL</p>
+          <h1><span>ARK</span><small>AUTONOMOUS<br>REFINERY KNOWLEDGE</small></h1>
+          <p class="ark-deck">Industrial knowledge, contained and made operational.</p>
+        </div>
+        <div class="ark-arrival-orbit" aria-hidden="true"><span></span><span></span><i>A</i></div>
+        <div class="ark-arrival-footer"><span>MRPL · SMART AUTOMATION</span><span>SIH 26117</span></div>
+      </div>
+    </section>
+
+    <section id="ark-02" class="ark-scene" data-ark-scene="1" aria-label="02 The Boundary">
+      <div class="ark-scene-inner ark-split-layout">
+        <div class="ark-scene-copy">
+          <p class="ark-index">02 / 10 · SOVEREIGNTY</p>
+          <h2>THE<br>BOUNDARY</h2>
+          <blockquote>“Sovereignty isn't a setting.<br>It's the architecture.”</blockquote>
+        </div>
+        <div class="ark-boundary" aria-label="The ARK security boundary">
+          <div class="ark-boundary-side safe"><small>INSIDE ARK</small><strong>CONFIDENTIAL<br>INDUSTRIAL<br>INFORMATION</strong><span>Local files · Local knowledge</span></div>
+          <div class="ark-boundary-line"><i></i><span>LOCAL BOUNDARY</span></div>
+          <div class="ark-boundary-side external"><small>OUTSIDE</small><strong>EXTERNAL<br>AI SYSTEMS</strong><span>No cloud account or API key</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="ark-03" class="ark-scene" data-ark-scene="2" aria-label="03 Information">
+      <div class="ark-scene-inner">
+        <div class="ark-scene-heading"><p class="ark-index">03 / 10 · MATERIALS</p><h2>INFORMATION<br>ENTERS WITH CONTEXT.</h2><p>ARK’s controlled library accepts the same industrial material used by the workbench.</p></div>
+        <div class="ark-material-stage" aria-label="Supported material types">
+          <article class="ark-material-main"><span class="ark-file-mark">PDF</span><div><small>DOCUMENTS</small><strong>Reports, procedures<br>and manuals</strong></div><i>01</i></article>
+          <article><span>TXT</span><strong>NOTES</strong></article>
+          <article><span>CSV</span><strong>DATA</strong></article>
+          <article><span>PNG</span><strong>DRAWINGS</strong></article>
+          <article><span>JPG</span><strong>PHOTOGRAPHS</strong></article>
+        </div>
+        <p class="ark-caption">SUPPORTED BY THE LIVE MATERIALS PIPELINE · PDF · TXT · CSV · PNG · JPG · JPEG</p>
+      </div>
+    </section>
+
+    <section id="ark-04" class="ark-scene" data-ark-scene="3" aria-label="04 Knowledge">
+      <div class="ark-scene-inner ark-flow-layout">
+        <div class="ark-scene-heading"><p class="ark-index">04 / 10 · LOCAL KNOWLEDGE</p><h2>FROM MATERIAL<br>TO RETRIEVAL.</h2><p>Selectable text and scanned pages move through the repository’s real extraction and retrieval path.</p></div>
+        <ol class="ark-process ark-process-knowledge">
+          <li><span>01</span><strong>MATERIAL</strong><small>Local upload</small></li>
+          <li><span>02</span><strong>EXTRACTION</strong><small>Text or OCR</small></li>
+          <li><span>03</span><strong>DECOMPOSITION</strong><small>Page records</small></li>
+          <li><span>04</span><strong>KNOWLEDGE</strong><small>Workspace scoped</small></li>
+          <li><span>05</span><strong>RETRIEVAL</strong><small>Relevant evidence</small></li>
+        </ol>
+      </div>
+    </section>
+
+    <section id="ark-05" class="ark-scene" data-ark-scene="4" aria-label="05 Evidence">
+      <div class="ark-scene-inner ark-evidence-layout">
+        <div class="ark-scene-heading"><p class="ark-index">05 / 10 · GROUNDED ANSWERS</p><h2>EVERY CLAIM CAN<br>RETURN TO EVIDENCE.</h2><p>When workspace sources are enabled, ARK’s Assistant preserves the path from response to extracted page.</p></div>
+        <div class="ark-evidence-card">
+          <div class="ark-question"><small>QUESTION</small><strong>Ask against approved workspace material.</strong></div>
+          <div class="ark-answer-bridge"><span>ARK ANSWER</span><i></i></div>
+          <div class="ark-sources"><small>SOURCE REFERENCES</small><button type="button" disabled>[S1] · PAGE 04</button><button type="button" disabled>[S2] · PAGE 11</button><button type="button" disabled>[S3] · PAGE 18</button><p>Reference pattern · actual citations appear only after local retrieval.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="ark-06" class="ark-scene" data-ark-scene="5" aria-label="06 Intelligence and Agent">
+      <div class="ark-scene-inner ark-agent-layout">
+        <div class="ark-scene-heading"><p class="ark-index">06 / 10 · INTELLIGENCE / AGENT</p><h2>WORK HAPPENS<br>IN VISIBLE STEPS.</h2><p>The running workflow records progress events while local models and tools complete the task.</p></div>
+        <div class="ark-agent-rail" aria-label="ARK workflow steps">
+          <span class="active"><i>01</i>PLAN</span><span><i>02</i>READ</span><span><i>03</i>RETRIEVE</span><span><i>04</i>ANALYZE</span><span><i>05</i>GENERATE</span><span><i>06</i>VERIFY</span>
+        </div>
+        <div class="ark-agent-core"><span>A</span><div><small>LOCAL TASK ROUTING</small><strong id="ark-model-status">Checking installed models</strong><p>Qwen general and coding routes · SmolVLM vision route</p></div></div>
+      </div>
+    </section>
+
+    <section id="ark-07" class="ark-scene" data-ark-scene="6" aria-label="07 Deliverables">
+      <div class="ark-scene-inner ark-deliverable-layout">
+        <div class="ark-scene-heading"><p class="ark-index">07 / 10 · DELIVERABLES</p><h2>KNOWLEDGE BECOMES<br>REVIEWABLE WORK.</h2><p>ARK produces editable review packs and verified fixed-purpose utilities through the existing workflow engine.</p></div>
+        <div class="ark-deliverable-flow"><span>TASK</span><i>↓</i><span>ANALYSIS</span><i>↓</i><span>DELIVERABLE</span></div>
+        <div class="ark-output-stack"><article><span>W</span><strong>WORD</strong><small>Approval note</small></article><article><span>X</span><strong>EXCEL</strong><small>Findings register</small></article><article><span>P</span><strong>POWERPOINT</strong><small>Inspection briefing</small></article><article><span>{ }</span><strong>CODE</strong><small>Verified utility</small></article></div>
+      </div>
+    </section>
+
+    <section id="ark-08" class="ark-scene" data-ark-scene="7" aria-label="08 Verification and Human Control">
+      <div class="ark-scene-inner ark-review-layout">
+        <div class="ark-scene-heading"><p class="ark-index">08 / 10 · HUMAN CONTROL</p><h2>THE FINAL DECISION<br>STAYS WITH PEOPLE.</h2><p>Generated work enters the application’s real review queue. Supervisors analyze, approve, or return it with a note.</p></div>
+        <ol class="ark-review-path"><li class="complete"><span>01</span><strong>GENERATE</strong><small>Draft produced</small></li><li class="complete"><span>02</span><strong>VERIFY</strong><small>Checks recorded</small></li><li class="current"><span>03</span><strong>HUMAN REVIEW</strong><small>Supervisor gate</small></li><li><span>04</span><strong>FINAL OUTPUT</strong><small>After decision</small></li></ol>
+        <div class="ark-review-note"><span>◇</span><p><strong>Human review required.</strong> ARK never claims autonomous approval.</p></div>
+      </div>
+    </section>
+
+    <section id="ark-09" class="ark-scene" data-ark-scene="8" aria-label="09 Sovereign Architecture">
+      <div class="ark-scene-inner ark-architecture-layout">
+        <div class="ark-scene-heading"><p class="ark-index">09 / 10 · SOVEREIGN ARCHITECTURE</p><h2>THE SYSTEM<br>STAYS LOCAL.</h2><p>A workstation architecture joins the authenticated workbench to local models, knowledge, tools, and files.</p></div>
+        <div class="ark-architecture-map" aria-label="ARK local architecture">
+          <span>USER</span><i>↓</i><span class="primary">ARK WORKBENCH</span><i>↓</i><div><span>LOCAL AGENT</span><span>LOCAL MODEL</span><span>LOCAL KNOWLEDGE</span><span>LOCAL TOOLS</span><span>LOCAL FILES</span></div>
+        </div>
+        <div class="ark-runtime-line"><span class="status-dot"></span><strong id="ark-runtime-status">CONTACTING LOCAL SERVICE</strong><small id="ark-runtime-detail">Runtime status comes from this workstation.</small></div>
+      </div>
+    </section>
+
+    <section id="ark-10" class="ark-scene" data-ark-scene="9" aria-label="10 The Workbench">
+      <div class="ark-scene-inner ark-workbench-layout">
+        <div class="ark-scene-heading"><p class="ark-index">10 / 10 · THE WORKBENCH</p><h2>ENTER THE<br>WORKING SYSTEM.</h2><p id="ark-session-copy">Continue to secure local access.</p><button id="ark-enter-final" class="ark-enter-button" type="button"><span>ENTER ARK</span><i>↗</i></button></div>
+        <div class="ark-workbench-preview" aria-label="Preview of the ARK workbench">
+          <aside><div class="ark-mini-brand"><span>A</span><strong>ARK</strong></div><small>WORKBENCH</small><b>▦ &nbsp; My workspaces</b><span>⌂ &nbsp; Overview</span><span>✦ &nbsp; Assistant</span><span>▤ &nbsp; Materials</span><span>↻ &nbsp; Workflows</span><span>◇ &nbsp; Offline status</span></aside>
+          <div><header><small>ARK</small><span><i class="status-dot"></i> LOCAL ONLY</span></header><main><p>YOUR PRIVATE WORK</p><h3>My workspaces</h3><div class="ark-mini-grid"><article><span>▱</span><strong>Industrial knowledge</strong><small>Materials · answers · deliverables</small></article><article><span>▱</span><strong>Inspection review</strong><small>Evidence · workflow · approval</small></article></div></main></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <nav class="ark-scene-nav" aria-label="Introduction pages"><button type="button" data-ark-go="0" class="active" aria-label="Page 1"></button><button type="button" data-ark-go="1" aria-label="Page 2"></button><button type="button" data-ark-go="2" aria-label="Page 3"></button><button type="button" data-ark-go="3" aria-label="Page 4"></button><button type="button" data-ark-go="4" aria-label="Page 5"></button><button type="button" data-ark-go="5" aria-label="Page 6"></button><button type="button" data-ark-go="6" aria-label="Page 7"></button><button type="button" data-ark-go="7" aria-label="Page 8"></button><button type="button" data-ark-go="8" aria-label="Page 9"></button><button type="button" data-ark-go="9" aria-label="Page 10"></button></nav>
+  <div class="ark-scroll-cue"><span id="ark-page-number">01</span><i></i><small>SCROLL TO REVEAL</small></div>
+</main>
 
 <main id="auth-view" class="auth-layout" hidden>
   <section class="brand-panel">
-    <a class="brand" href="/" aria-label="Aegis home"><span class="brand-mark">A</span><span>aegis</span><span class="brand-local">ON-PREMISE AI</span></a>
+    <a class="brand" href="/" aria-label="ARK home"><span class="brand-mark">A</span><span>ARK</span><span class="brand-local">AUTONOMOUS REFINERY KNOWLEDGE</span></a>
     <div class="brand-copy">
       <p class="eyebrow">SOVEREIGN INDUSTRIAL WORKBENCH</p>
       <h1>Confidential work<br>stays on this machine.</h1>
@@ -45,7 +175,7 @@
 
 <div id="workspace-view" class="shell" hidden>
   <aside class="sidebar">
-    <a class="brand" href="/"><span class="brand-mark">A</span><span>aegis</span></a>
+    <a class="brand" href="/" aria-label="ARK home"><span class="brand-mark">A</span><span>ARK</span></a>
     <div class="sidebar-product"><span class="status-dot"></span><div><strong>Local workbench</strong><small>Running on this computer</small></div></div>
     <nav aria-label="Main navigation">
       <p class="sidebar-label">WORKBENCH</p><button class="nav-item selected" id="home-button"><span aria-hidden="true">▦</span><span>My workspaces</span></button>
@@ -58,13 +188,13 @@
         <button class="nav-item workspace-nav-item" data-tab="security"><span aria-hidden="true">◇</span><span>Offline status</span></button>
       </div>
       <button class="nav-item" id="admin-users" hidden><span aria-hidden="true">♙</span><span>Manage users</span></button>
-      <p class="sidebar-label">HELP</p><button class="nav-item" id="guide-button"><span aria-hidden="true">?</span><span>How to use Aegis</span></button><button class="nav-item" id="account-button"><span aria-hidden="true">○</span><span>Account & display</span></button>
+      <p class="sidebar-label">HELP</p><button class="nav-item" id="guide-button"><span aria-hidden="true">?</span><span>How to use ARK</span></button><button class="nav-item" id="account-button"><span aria-hidden="true">○</span><span>Account & display</span></button>
     </nav>
     <div class="profile"><span id="avatar" class="avatar"></span><div><strong id="profile-name"></strong><span id="profile-username"></span><small id="profile-role"></small></div><button id="logout" class="icon-button" title="Sign out" aria-label="Sign out">↪</button></div>
   </aside>
 
   <main class="main-area">
-    <header class="topbar"><div><span class="topbar-kicker">AEGIS</span><span id="topbar-location">My workspaces</span></div><div class="topbar-state"><span class="status-dot"></span><span>Local only</span><span id="models-top-status" class="version">Checking models</span></div></header>
+    <header class="topbar"><div><span class="topbar-kicker">ARK</span><span id="topbar-location">My workspaces</span></div><div class="topbar-state"><span class="status-dot"></span><span>Local only</span><span id="models-top-status" class="version">Checking models</span></div></header>
     <div class="content">
       <section id="workspace-list-view">
         <div class="page-heading"><div><p id="workspace-eyebrow" class="eyebrow ink">YOUR PRIVATE WORK</p><h1 id="workspace-page-title">My workspaces</h1><p id="workspace-page-subtitle" class="muted">Separate materials, conversations and deliverables by project.</p></div><button id="new-workspace" class="primary">＋ New workspace</button></div>
@@ -78,7 +208,7 @@
 
         <section id="panel-overview" class="workspace-panel" data-panel="overview">
           <div class="overview-grid">
-            <article class="welcome-card"><p class="eyebrow">WORKSPACE OVERVIEW</p><h2>Continue your confidential work.</h2><p>Add source material, ask a grounded question, or create a review pack from an inspection report.</p><div class="quick-actions"><button class="primary jump-action" data-tab="materials">Add materials</button><button class="secondary jump-action" data-tab="assistant">Ask Aegis</button></div></article>
+            <article class="welcome-card"><p class="eyebrow">WORKSPACE OVERVIEW</p><h2>Continue your confidential work.</h2><p>Add source material, ask a grounded question, or create a review pack from an inspection report.</p><div class="quick-actions"><button class="primary jump-action" data-tab="materials">Add materials</button><button class="secondary jump-action" data-tab="assistant">Ask ARK</button></div></article>
             <div class="metric-grid">
               <article class="metric-card"><span class="metric-icon">▤</span><strong id="metric-documents">0</strong><p>Materials</p><small id="metric-read">0 ready for questions</small></article>
               <article class="metric-card"><span class="metric-icon">✦</span><strong id="metric-answers">0</strong><p>Saved answers</p><small>Private to this workspace</small></article>
@@ -95,7 +225,7 @@
 
         <section id="panel-assistant" class="workspace-panel" data-panel="assistant" hidden>
           <section class="assistant-panel">
-            <div class="assistant-heading"><div><p class="eyebrow ink">LOCAL ASSISTANT</p><h2>Ask Aegis</h2><p class="muted">The workbench selects a local model based on your request.</p></div><span id="models-status" class="version">CHECKING MODELS</span></div>
+            <div class="assistant-heading"><div><p class="eyebrow ink">LOCAL ASSISTANT</p><h2>Ask ARK</h2><p class="muted">The workbench selects a local model based on your request.</p></div><span id="models-status" class="version">CHECKING MODELS</span></div>
             <div class="suggestion-row" aria-label="Example requests"><button type="button" class="suggestion">Summarize the key findings</button><button type="button" class="suggestion">Draft an approval note</button><button type="button" class="suggestion">Explain this calculation</button></div>
             <section class="incident-intake"><div class="surface-heading"><div><p class="eyebrow ink">INCIDENT INTAKE</p><h3>Attach the incident and supporting evidence</h3><p class="muted">Drop an incident report, maintenance log, SOP, or supporting image here. Press Enter in your request to start the local analysis.</p></div><span class="privacy-chip"><span class="status-dot"></span> Local only</span></div><label id="assistant-drop-zone" class="drop-zone assistant-drop-zone" for="assistant-files"><span class="drop-icon">＋</span><strong>Drop incident files here or choose from this computer</strong><small>PDF, TXT, CSV, PNG or JPEG · Up to 20 MB each</small><span class="primary">Choose files</span></label><input id="assistant-files" type="file" multiple accept=".pdf,.txt,.csv,.png,.jpg,.jpeg" class="file-input"><p id="assistant-upload-status" class="inline-status" role="status"></p><p id="assistant-upload-error" class="error" role="alert" hidden></p><div id="assistant-file-list" class="assistant-file-list" aria-live="polite"></div></section>
             <form id="prompt-form" class="prompt-composer"><label for="task-prompt">Your request</label><textarea id="task-prompt" rows="5" maxlength="2000" required placeholder="Ask a question or describe the incident analysis…"></textarea><div class="composer-footer"><label class="grounded-toggle"><input id="use-documents" type="checkbox" disabled><span><strong>Use workspace sources</strong><small id="source-readiness">Attach and read incident material to enable source-grounded analysis</small></span></label><button id="generate-button" class="primary" type="submit">Analyze incident <span aria-hidden="true">↗</span></button></div></form>
@@ -129,7 +259,7 @@
         <section id="panel-workflows" class="workspace-panel" data-panel="workflows" hidden>
           <section id="workflow-panel" class="assistant-panel">
             <div class="surface-heading"><div><p class="eyebrow ink">TASK AUTOMATION</p><h2>Workflows & deliverables</h2><p class="muted">Follow each step, review the evidence, then download editable outputs.</p></div></div>
-            <div class="workflow-launchers"><article><span class="launcher-icon">▤</span><div><h3>Inspection review pack</h3><p>Start from a material’s <strong>Create review pack</strong> action. Aegis drafts a Word note, Excel register and PowerPoint briefing.</p></div><button class="secondary jump-action" data-tab="materials">Choose material</button></article><article><span class="launcher-icon">⌘</span><div><h3>Verified utility</h3><p>Generate a small function and check it against three independent examples inside an isolated runtime.</p></div><div class="utility-controls"><select id="code-utility" aria-label="Utility to build"><option value="temperature">Celsius to Fahrenheit</option><option value="sum_readings">Sum numeric readings</option></select><button id="run-code" class="primary">Generate & verify</button></div></article></div>
+            <div class="workflow-launchers"><article><span class="launcher-icon">▤</span><div><h3>Inspection review pack</h3><p>Start from a material’s <strong>Create review pack</strong> action. ARK drafts a Word note, Excel register and PowerPoint briefing.</p></div><button class="secondary jump-action" data-tab="materials">Choose material</button></article><article><span class="launcher-icon">⌘</span><div><h3>Verified utility</h3><p>Generate a small function and check it against three independent examples inside an isolated runtime.</p></div><div class="utility-controls"><select id="code-utility" aria-label="Utility to build"><option value="temperature">Celsius to Fahrenheit</option><option value="sum_readings">Sum numeric readings</option></select><button id="run-code" class="primary">Generate & verify</button></div></article></div>
             <p id="run-error" class="error" role="alert" hidden></p><div class="workflow-toolbar run-heading"><div><h2>Workflow history <span id="run-count">0</span></h2><p>Updates automatically while a task is running</p></div><div class="filter-pills" role="group" aria-label="Filter workflow history"><button type="button" class="filter-pill run-filter active" data-run-filter="all">All</button><button type="button" class="filter-pill run-filter" data-run-filter="running">Running</button><button type="button" class="filter-pill run-filter" data-run-filter="complete">Complete</button></div></div><div id="run-list"></div><div id="run-empty" class="compact-empty"><span>↻</span><h3>No workflows yet</h3><p>Create a review pack from Materials or verify a utility above.</p></div><div id="run-no-match" class="compact-empty" hidden><span>⌕</span><h3>No workflows in this view</h3><p>Choose another filter to see saved runs.</p></div>
           </section>
         </section>
@@ -140,7 +270,7 @@
           <section class="network-panel"><div class="surface-heading"><div><p class="eyebrow ink">LIVE OBSERVATION</p><h2>Connection monitor</h2></div><span id="network-badge" class="privacy-chip"><span class="status-dot"></span> Watching</span></div><p id="network-summary" class="network-summary">Loading observations…</p><p id="network-detail" class="field-help"></p><div class="evidence-note"><strong>Evidence boundary</strong><p>The live monitor samples the application and child processes. Very short connections may be missed until packet-capture evidence is completed.</p></div></section>
         </section>
       </section>
-      <footer class="workspace-footer">Aegis local prototype · Generated work requires human review</footer>
+      <footer class="workspace-footer">ARK · Autonomous Refinery Knowledge · Generated work requires human review</footer>
     </div>
   </main>
 </div>

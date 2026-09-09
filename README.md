@@ -1,9 +1,9 @@
-# Aegis — SIH26117 local workbench
+# ARK — Autonomous Refinery Knowledge
 
-The current prototype includes local accounts, private workspaces, material uploads and OCR, source-grounded answers, automatic local model selection, multimodal interpretation, agent workflows, editable Office deliverables, verified WebAssembly utilities, and visible local-connection observations.
+ARK is the SIH26117 sovereign industrial workbench for MRPL Smart Automation. The current prototype includes a ten-scene cinematic introduction, local accounts, private workspaces, material uploads and OCR, source-grounded answers, automatic local model selection, multimodal interpretation, agent workflows, editable Office deliverables, verified WebAssembly utilities, and visible local-connection observations.
 
 ## Run on this Windows computer
-Double-click `Start Aegis.cmd`, then open http://127.0.0.1:8765 in your browser.
+Double-click `Start ARK.cmd`, then open http://127.0.0.1:8765 in your browser.
 Create your own account using **Create account**. There is no default password.
 
 ## Role portals

@@ -19,7 +19,7 @@ def install_guard():
     def check(address):
         if isinstance(address,tuple) and not allowed(address[0]):
             ATTEMPTS.append({'time':int(time.time()),'host':str(address[0])[:100]});del ATTEMPTS[:-100]
-            raise PermissionError('Aegis blocks non-loopback network destinations.')
+            raise PermissionError('ARK blocks non-loopback network destinations.')
     def connect(self,address):check(address);return original_connect(self,address)
     def connect_ex(self,address):check(address);return original_connect_ex(self,address)
     def sendto(self,*args):check(args[-1]);return original_sendto(self,*args)

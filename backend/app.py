@@ -165,7 +165,7 @@ def create_app(db_path=None, model_engine=None):
         finally:
             engine.close()
             monitor.close()
-    app = FastAPI(title='Aegis Local Workbench', docs_url=None, redoc_url=None, lifespan=lifespan)
+    app = FastAPI(title='ARK — Autonomous Refinery Knowledge', docs_url=None, redoc_url=None, lifespan=lifespan)
     app.add_middleware(TrustedHostMiddleware, allowed_hosts=['127.0.0.1', 'localhost'])
     hasher = PasswordHasher(time_cost=3, memory_cost=65536, parallelism=2)
     dummy_hash = hasher.hash(secrets.token_urlsafe(32))
