@@ -5,7 +5,7 @@ Use this route instead of the Azure VM. Funnel publishes a **separate synthetic-
 ## 1. Prepare the isolated demo while it is private
 
 1. Install Tailscale for Windows from https://tailscale.com/download and sign in to a Personal account. Funnel is included on all plans, but check the Personal plan terms for your use.
-2. Double-click `Start Demo Setup.cmd`. It uses `demo-data/` and listens only on `http://127.0.0.1:8767`. No Funnel should point to this port.
+2. Double-click `Start Demo Setup.cmd`. It uses `demo-data/` and listens only on `http://localhost:8767`. No Funnel should point to this port. Use `localhost` in the browser so its sign-in cookie stays separate from the private workbench at `127.0.0.1:8765`.
 3. In that local setup site, create a dedicated Judge/User account and a separate Reviewer/Supervisor account. Use unique passwords unrelated to personal or MRPL accounts. Create a private Administrator account if needed. Never reuse accounts from `data/`.
 4. Stop the setup server. Assign the reviewer role with `scripts/set_user_role.py`, pointing it at `demo-data/workbench.sqlite3`. For example:
 
