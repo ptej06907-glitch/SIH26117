@@ -19,7 +19,7 @@ from argon2.exceptions import VerificationError, InvalidHashError
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.responses import Response
-from urllib.parse import quote
+from urllib.parse import quote, urlsplit
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, ConfigDict, field_validator
 from starlette.middleware.trustedhost import TrustedHostMiddleware
@@ -81,6 +81,16 @@ class ReviewAction(BaseModel):
 
 
 def create_app(db_path=None, model_engine=None):
+    public_demo_origin = os.environ.get('ARK_PUBLIC_DEMO_ORIGIN', '').strip().rstrip('/')
+    if public_demo_origin:
+        parsed_origin = urlsplit(public_demo_origin)
+        if (parsed_origin.scheme != 'https' or not parsed_origin.hostname or
+                parsed_origin.username or parsed_origin.password or parsed_origin.path or
+                parsed_origin.query or parsed_origin.fragment or
+                parsed_origin.netloc != parsed_origin.netloc.lower()):
+            raise ValueError('ARK_PUBLIC_DEMO_ORIGIN must be a single HTTPS origin, such as https://demo.example.org.')
+        # Reading .port also rejects malformed port numbers before the server starts.
+        _ = parsed_origin.port
     db_path = Path(db_path or ROOT / 'data' / 'workbench.sqlite3')
     db_path.parent.mkdir(parents=True, exist_ok=True)
     upload_dir = db_path.parent / 'uploads'
@@ -166,7 +176,10 @@ def create_app(db_path=None, model_engine=None):
             engine.close()
             monitor.close()
     app = FastAPI(title='ARK — Autonomous Refinery Knowledge', docs_url=None, redoc_url=None, lifespan=lifespan)
-    app.add_middleware(TrustedHostMiddleware, allowed_hosts=['127.0.0.1', 'localhost'])
+    trusted_hosts = ['127.0.0.1', 'localhost']
+    if public_demo_origin:
+        trusted_hosts.append(parsed_origin.hostname)
+    app.add_middleware(TrustedHostMiddleware, allowed_hosts=trusted_hosts)
     hasher = PasswordHasher(time_cost=3, memory_cost=65536, parallelism=2)
     dummy_hash = hasher.hash(secrets.token_urlsafe(32))
     attempts = defaultdict(deque)
@@ -176,8 +189,10 @@ def create_app(db_path=None, model_engine=None):
     async def browser_boundary(request, call_next):
         if request.method not in ('GET', 'HEAD', 'OPTIONS'):
             origin = request.headers.get('origin')
-            expected = str(request.base_url).rstrip('/')
-            if (origin and origin != expected) or request.headers.get('sec-fetch-site') == 'cross-site':
+            expected = public_demo_origin or str(request.base_url).rstrip('/')
+            if ((public_demo_origin and origin != expected) or
+                    (origin and origin != expected) or
+                    request.headers.get('sec-fetch-site') == 'cross-site'):
                 return JSONResponse({'detail': 'Cross-site requests are not allowed.'}, status_code=403)
             if request.headers.get('x-workbench-request') != '1':
                 return JSONResponse({'detail': 'Missing local request header.'}, status_code=403)
@@ -192,6 +207,8 @@ def create_app(db_path=None, model_engine=None):
         response.headers['X-Content-Type-Options'] = 'nosniff'
         response.headers['Referrer-Policy'] = 'no-referrer'
         response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'"
+        if public_demo_origin:
+            response.headers['Strict-Transport-Security'] = 'max-age=31536000'
         return response
 
     def limit_auth(request):
@@ -229,9 +246,13 @@ def create_app(db_path=None, model_engine=None):
             con.execute('INSERT INTO audit_events(user_id,action,created_at) VALUES (?,?,?)',
                         (user['id'], 'signed_in', int(time.time())))
         response = JSONResponse({'user': {k: user[k] for k in ('id', 'username', 'display_name', 'role')}, 'csrf_token': csrf})
-        # HTTP is restricted to loopback for this prototype. LAN deployment requires TLS + Secure cookies.
-        response.set_cookie(COOKIE, token, httponly=True, samesite='strict', max_age=SESSION_SECONDS, path='/')
+        response.set_cookie(COOKIE, token, httponly=True, secure=bool(public_demo_origin),
+                            samesite='strict', max_age=SESSION_SECONDS, path='/')
         return response
+
+    @app.get('/api/deployment')
+    def deployment():
+        return {'public_demo': bool(public_demo_origin), 'registration_enabled': not bool(public_demo_origin)}
 
     @app.get('/api/system/network')
     def network(request: Request):
@@ -247,6 +268,8 @@ def create_app(db_path=None, model_engine=None):
 
     @app.post('/api/auth/register', status_code=201)
     def register(data: Registration, request: Request):
+        if public_demo_origin:
+            raise HTTPException(403, 'Accounts for this public demo are assigned by the team.')
         limit_auth(request)
         user = {'id': str(uuid.uuid4()), 'username': data.username, 'display_name': data.display_name, 'role':'user'}
         password_hash = hasher.hash(data.password)

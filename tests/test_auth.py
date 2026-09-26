@@ -148,6 +148,33 @@ def test_sql_payload_is_data(setup):
             assert db.execute('PRAGMA foreign_key_check').fetchall() == []
 
 
+def test_public_demo_origin_login_and_registration(tmp_path, monkeypatch):
+    path = tmp_path / 'public-demo.sqlite3'
+    with client(create_app(path)) as local:
+        register(local)
+    monkeypatch.setenv('ARK_PUBLIC_DEMO_ORIGIN', 'https://ark-demo.example')
+    app = create_app(path)
+    with TestClient(app, base_url='https://ark-demo.example',
+                    headers={**HEADERS, 'Origin': 'https://ark-demo.example'}) as demo:
+        assert demo.get('/api/deployment').json() == {'public_demo': True, 'registration_enabled': False}
+        assert demo.post('/api/auth/register', json={'username': 'newuser', 'display_name': 'New User',
+                                                      'password': PASSWORD}).status_code == 403
+        login = demo.post('/api/auth/login', json={'username': 'alice', 'password': PASSWORD})
+        assert login.status_code == 200
+        assert 'secure' in login.headers['set-cookie'].lower()
+        demo.headers['X-CSRF-Token'] = login.json()['csrf_token']
+        assert demo.post('/api/workspaces', json={'name': 'Synthetic demo'}).status_code == 201
+        assert demo.post('/api/workspaces', json={'name': 'Wrong origin'},
+                         headers={'Origin': 'https://other.example'}).status_code == 403
+        assert demo.post('/api/workspaces', json={'name': 'Missing origin'},
+                         headers={'Origin': ''}).status_code == 403
+        assert demo.get('/', headers={'Host': 'other.example'}).status_code == 400
+        assert 'max-age=' in demo.get('/api/deployment').headers['strict-transport-security']
+    monkeypatch.setenv('ARK_PUBLIC_DEMO_ORIGIN', 'http://ark-demo.example')
+    with pytest.raises(ValueError):
+        create_app(tmp_path / 'invalid.sqlite3')
+
+
 def test_role_portals_and_hierarchical_access(setup):
     app,path=setup
     with client(app) as owner,client(app) as supervisor,client(app) as administrator:

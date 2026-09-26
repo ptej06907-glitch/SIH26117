@@ -247,13 +247,13 @@ def install(app,database,identity,owned_workspace,engine,db_path,upload_dir):
                 draft=extractive_approval_note(evidence)
             directory=artifacts/run;names=build_exports(directory,draft,evidence)
             links=[attach(run,workspace_id,directory/name) for name in names]
-            update(run,'Created editable Word, Excel and PowerPoint files; human review remains required.','complete',{'draft':draft,'sources':evidence,'artifacts':links,'review_required':True})
             with database() as con:
                 con.execute('''INSERT OR IGNORE INTO review_requests
                     (id,run_id,workspace_id,document_id,requester_id,status,reviewer_note,created_at)
                     VALUES (?,?,?,?,?,'pending_analysis','',?)''',
                     (str(uuid.uuid4()),run,workspace_id,primary['id'],user['id'],int(time.time())))
                 con.execute('INSERT INTO audit_events(user_id,action,created_at) VALUES (?,?,?)',(user['id'],'review_request_created',int(time.time())))
+            update(run,'Created editable Word, Excel and PowerPoint files; human review remains required.','complete',{'draft':draft,'sources':evidence,'artifacts':links,'review_required':True})
         return create_run(workspace_id,'inspection',work)
 
     @app.post('/api/workspaces/{workspace_id}/code-runs',status_code=202)

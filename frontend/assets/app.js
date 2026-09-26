@@ -1,7 +1,7 @@
 const $ = id => document.getElementById(id);
 let activeWorkspace = null, activeWorkspaceData = null, activeReadOnly = false, uploading = false, assistantDocumentIds = [];
 let workspaceMode = 'create', pendingDelete = null;
-let mode = 'login', portal = ['user','supervisor','administrator'].includes(location.pathname.split('/').pop()) ? location.pathname.split('/').pop() : 'user', csrf = '', user = null, toastTimer;
+let mode = 'login', portal = ['user','supervisor','administrator'].includes(location.pathname.split('/').pop()) ? location.pathname.split('/').pop() : 'user', csrf = '', user = null, toastTimer, publicDemo = false;
 async function api(path, options = {}) {
   const response = await fetch(`/api${path}`, {credentials:'same-origin', ...options,
     headers:{'Content-Type':'application/json','X-Workbench-Request':'1','X-CSRF-Token':csrf,...options.headers}});
@@ -16,18 +16,18 @@ async function api(path, options = {}) {
 function error(id, message) { $(id).textContent = message; $(id).hidden = !message; }
 function toast(message) {clearTimeout(toastTimer); $('toast').textContent=message; $('toast').hidden=false; toastTimer=setTimeout(()=>$('toast').hidden=true,4000);}
 function setMode(next) {
-  if(portal!=='user'&&next==='register')next='login';
+  if((portal!=='user'||publicDemo)&&next==='register')next='login';
   mode=next; const register=mode==='register';
   $('name-field').hidden=!register; $('display-name').required=register; $('password-help').hidden=!register;
   $('auth-title').textContent=register?'Create a User account.':`${portal[0].toUpperCase()+portal.slice(1)} portal`;
   const descriptions={user:'Sign in to your private workspaces.',supervisor:'Sign in with an account assigned by an Administrator. Create new accounts in the User portal first.',administrator:'Manage every workspace and local account role. New accounts are created in the User portal, then assigned here.'};
-  $('auth-subtitle').textContent=register?'New accounts begin with standard User access.':descriptions[portal];
+  $('auth-subtitle').textContent=register?'New accounts begin with standard User access.':publicDemo?'Public synthetic-data demo. Sign in with the credentials supplied for evaluation.':descriptions[portal];
   $('auth-submit').textContent=register?'Create account ↗':'Sign in ↗';
   $('password').autocomplete=register?'new-password':'current-password';
   ['login','register'].forEach(tab=>{$(`${tab}-tab`).classList.toggle('active',tab===mode); $(`${tab}-tab`).setAttribute('aria-pressed',String(tab===mode));});
   error('auth-error','');
 }
-function setPortal(next,updateUrl=true){portal=next;document.body.dataset.portal=portal;document.querySelectorAll('[data-portal]').forEach(button=>button.classList.toggle('active',button.dataset.portal===portal));$('register-tab').hidden=portal!=='user';if(updateUrl)history.replaceState({},'',`/login/${portal}`);setMode('login');}
+function setPortal(next,updateUrl=true){portal=next;document.body.dataset.portal=portal;document.querySelectorAll('[data-portal]').forEach(button=>button.classList.toggle('active',button.dataset.portal===portal));$('register-tab').hidden=portal!=='user'||publicDemo;if(updateUrl)history.replaceState({},'',`/login/${portal}`);setMode('login');}
 document.querySelectorAll('[data-portal]').forEach(button=>button.onclick=()=>setPortal(button.dataset.portal));
 function showAuth(){window.ARKLanding?.hide();activeWorkspace=null;activeWorkspaceData=null;$('document-list').replaceChildren();$('generation-list').replaceChildren();user=null;csrf='';$('workspace-view').hidden=true;$('auth-view').hidden=false;$('boot').hidden=true;$('workspace-dialog').close();$('delete-dialog').close();$('workspace-grid').replaceChildren();$('detail-name').textContent='';$('detail-description').textContent='';$('profile-name').textContent='';$('profile-username').textContent='';}
 async function showWorkspace(data){
@@ -104,7 +104,29 @@ function openDelete(item){pendingDelete=item;error('delete-error','');$('delete-
 function updateDeleteButton(){$('confirm-delete').disabled=!pendingDelete||(pendingDelete.kind==='workspace'&&$('delete-name').value!==pendingDelete.name);}
 async function confirmDelete(){if(!pendingDelete)return;const item=pendingDelete;$('confirm-delete').disabled=true;error('delete-error','');try{if(item.kind==='workspace'){await api(`/workspaces/${item.id}`,{method:'DELETE'});$('delete-dialog').close();pendingDelete=null;await loadWorkspaces();toast('Workspace deleted.');}else{await api(`/documents/${item.id}`,{method:'DELETE'});$('delete-dialog').close();pendingDelete=null;await loadDocuments(activeWorkspace);toast('Material removed.');}}catch(e){error('delete-error',e.message);updateDeleteButton();}}
 window.addEventListener('ark:enter-workbench',async event=>{const session=event.detail?.session;if(session)await showWorkspace(session);else{history.replaceState({},'',`/login/${portal}`);showAuth();}});
-(async()=>{setPortal(portal,false);let session=null;try{session=await api('/auth/me');}catch{/* Secure access remains available when there is no session. */}if(location.pathname.startsWith('/login/')){if(session)await showWorkspace(session);else showAuth();return;}if(window.ARKLanding){$('auth-view').hidden=true;$('workspace-view').hidden=true;await window.ARKLanding.show(session);}else if(session)await showWorkspace(session);else showAuth();})();
+(async()=>{
+  try{publicDemo=(await api('/deployment')).public_demo;}catch{/* Local mode remains usable if deployment status is unavailable. */}
+  if(publicDemo){
+    $('public-demo-banner').hidden=false;
+    document.querySelector('.topbar-state > span:nth-child(2)').textContent='Synthetic public demo';
+    document.querySelector('.sidebar-product strong').textContent='Demo workbench';
+    document.querySelector('.sidebar-product small').textContent='Running on the demo server';
+    document.querySelector('.brand-panel .brand-copy .eyebrow').textContent='ARK SYNTHETIC-DATA DEMO';
+    document.querySelector('.brand-panel .brand-copy h1').textContent='Explore ARK with synthetic data.';
+    document.querySelector('.brand-panel .brand-copy > p:not(.eyebrow)').textContent='Try source-grounded review, local models and human approval on this hosted demonstration.';
+    document.querySelector('.auth-card .eyebrow').textContent='PUBLIC DEMO ACCESS';
+    document.querySelector('.auth-top > span:first-child').textContent='ARK · SMART AUTOMATION';
+    document.querySelector('.local-note p strong').textContent='Public demonstration server.';
+    document.querySelector('.local-note p span').textContent='Use synthetic data only; do not upload confidential files.';
+    document.querySelector('.auth-bottom').textContent='Public synthetic-data demo · Accounts are assigned by the team';
+    document.querySelector('.brand-panel footer').textContent='ARK demo server / SIH 26117';
+  }
+  setPortal(portal,false);
+  let session=null;try{session=await api('/auth/me');}catch{/* Sign-in remains available when there is no session. */}
+  if(publicDemo){if(session)await showWorkspace(session);else showAuth();return;}
+  if(location.pathname.startsWith('/login/')){if(session)await showWorkspace(session);else showAuth();return;}
+  if(window.ARKLanding){$('auth-view').hidden=true;$('workspace-view').hidden=true;await window.ARKLanding.show(session);}else if(session)await showWorkspace(session);else showAuth();
+})();
 
 function formatSize(bytes){return bytes < 1024*1024 ? `${Math.ceil(bytes/1024)} KB` : `${(bytes/1024/1024).toFixed(1)} MB`;}
 let materialFilter='all';

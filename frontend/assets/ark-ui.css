@@ -529,3 +529,14 @@ body[data-portal="administrator"] .primary:hover { background: #000; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
+
+.public-demo-banner {
+  margin: 0 0 18px;
+  padding: 11px 15px;
+  border: 1px solid #c7dfe6;
+  border-radius: 11px;
+  background: #eaf5f7;
+  color: #173d56;
+  font-size: .85rem;
+  font-weight: 600;
+}
