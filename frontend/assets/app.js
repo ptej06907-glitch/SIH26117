@@ -108,6 +108,12 @@ window.addEventListener('ark:enter-workbench',async event=>{const session=event.
   try{publicDemo=(await api('/deployment')).public_demo;}catch{/* Local mode remains usable if deployment status is unavailable. */}
   if(publicDemo){
     $('public-demo-banner').hidden=false;
+    document.querySelector('.ark-header-meta span:first-child').textContent='PUBLIC SYNTHETIC DEMO';
+    document.querySelector('.ark-arrival-footer span:first-child').textContent='FICTIONAL SAMPLE DATA ONLY';
+    document.querySelector('.ark-deck').textContent='Explore a hosted demonstration with local models and synthetic documents.';
+    document.querySelector('.ark-boundary-side.safe strong').innerHTML='FICTIONAL<br>INDUSTRIAL<br>INFORMATION';
+    document.querySelector('.ark-boundary-side.safe > span').textContent='Sample files · local model processing';
+    document.querySelector('.ark-runtime-line small').textContent='Runtime status comes from this demo server.';
     document.querySelector('.topbar-state > span:nth-child(2)').textContent='Synthetic public demo';
     document.querySelector('.sidebar-product strong').textContent='Demo workbench';
     document.querySelector('.sidebar-product small').textContent='Running on the demo server';
@@ -123,7 +129,6 @@ window.addEventListener('ark:enter-workbench',async event=>{const session=event.
   }
   setPortal(portal,false);
   let session=null;try{session=await api('/auth/me');}catch{/* Sign-in remains available when there is no session. */}
-  if(publicDemo){if(session)await showWorkspace(session);else showAuth();return;}
   if(location.pathname.startsWith('/login/')){if(session)await showWorkspace(session);else showAuth();return;}
   if(window.ARKLanding){$('auth-view').hidden=true;$('workspace-view').hidden=true;await window.ARKLanding.show(session);}else if(session)await showWorkspace(session);else showAuth();
 })();
