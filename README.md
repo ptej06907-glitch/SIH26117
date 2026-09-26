@@ -6,6 +6,8 @@ ARK is the SIH26117 sovereign industrial workbench for MRPL Smart Automation. Th
 Double-click `Start ARK.cmd`, then open http://127.0.0.1:8765 in your browser.
 Create your own account using **Create account**. There is no default password.
 
+For a separate synthetic-data judge link through Tailscale Funnel, follow [the demo setup guide](docs/TAILSCALE_FUNNEL_DEMO.md). Do not publish the private workbench on port 8765.
+
 ## Role portals
 
 - User: http://127.0.0.1:8765/login/user

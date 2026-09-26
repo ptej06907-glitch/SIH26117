@@ -91,7 +91,7 @@ def create_app(db_path=None, model_engine=None):
             raise ValueError('ARK_PUBLIC_DEMO_ORIGIN must be a single HTTPS origin, such as https://demo.example.org.')
         # Reading .port also rejects malformed port numbers before the server starts.
         _ = parsed_origin.port
-    db_path = Path(db_path or ROOT / 'data' / 'workbench.sqlite3')
+    db_path = Path(db_path or os.environ.get('ARK_DB_PATH') or ROOT / 'data' / 'workbench.sqlite3')
     db_path.parent.mkdir(parents=True, exist_ok=True)
     upload_dir = db_path.parent / 'uploads'
     upload_dir.mkdir(exist_ok=True)

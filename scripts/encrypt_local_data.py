@@ -1,5 +1,6 @@
 """Run with the server stopped. Keeps a DPAPI-encrypted recovery copy."""
 import sys
+import argparse
 import sqlite3
 import socket
 import uuid
@@ -8,9 +9,11 @@ sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from backend import vault
 
 def migrate(root):
-    with socket.socket() as probe:
-        probe.settimeout(1)
-        if probe.connect_ex(('127.0.0.1',8765))==0:raise RuntimeError('Stop the application on port 8765 before migration.')
+    for port in (8765,8766,8767):
+        with socket.socket() as probe:
+            probe.settimeout(1)
+            if probe.connect_ex(('127.0.0.1',port))==0:
+                raise RuntimeError(f'Stop the application on port {port} before migration.')
     root=Path(root).resolve()
     path=root/'workbench.sqlite3'
     if not path.exists():raise RuntimeError('Database missing.')
@@ -38,4 +41,7 @@ def migrate(root):
     (root/'.require-antivirus').touch()
     print('Database, uploads, previews and artifacts encrypted. Recovery copy verified.')
 
-if __name__=='__main__':migrate(Path(__file__).resolve().parents[1]/'data')
+if __name__=='__main__':
+    parser=argparse.ArgumentParser(description='Encrypt a stopped ARK data directory with Windows DPAPI.')
+    parser.add_argument('--directory',type=Path,default=Path(__file__).resolve().parents[1]/'data')
+    migrate(parser.parse_args().directory)

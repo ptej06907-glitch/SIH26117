@@ -175,6 +175,18 @@ def test_public_demo_origin_login_and_registration(tmp_path, monkeypatch):
         create_app(tmp_path / 'invalid.sqlite3')
 
 
+def test_demo_database_environment_is_isolated(tmp_path, monkeypatch):
+    demo_path = tmp_path / 'synthetic-demo' / 'workbench.sqlite3'
+    monkeypatch.setenv('ARK_DB_PATH', str(demo_path))
+    with client(create_app()) as demo:
+        register(demo)
+        assert demo.get('/api/auth/me').status_code == 200
+    assert demo_path.is_file()
+    assert not (tmp_path / 'data' / 'workbench.sqlite3').exists()
+    with client(create_app(tmp_path / 'explicit.sqlite3')) as explicit:
+        assert explicit.get('/api/auth/me').status_code == 401
+
+
 def test_role_portals_and_hierarchical_access(setup):
     app,path=setup
     with client(app) as owner,client(app) as supervisor,client(app) as administrator:
