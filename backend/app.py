@@ -166,7 +166,7 @@ def create_app(db_path=None, model_engine=None):
 
     from backend.network import Monitor
     monitor=Monitor(db_path.parent/'network-observation.json')
-    engine = model_engine or LocalModels(ROOT)
+    engine = model_engine or LocalModels(ROOT, db_path.parent/'model-logs')
     @asynccontextmanager
     async def lifespan(application):
         monitor.start()

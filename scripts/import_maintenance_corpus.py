@@ -1,11 +1,4 @@
-"""Import the supplied maintenance corpus into a local Aegis workspace.
-
-This is intentionally local-only. It copies the three Markdown source files into
-the application's upload store, records their metadata in SQLite, and extracts
-their pages so Assistant source retrieval can use them. The test matrix and JSON
-task list remain versioned fixtures in samples/test-fixtures rather than being
-treated as operational evidence.
-"""
+"""Import local sample references, or curated fictional files for a public ARK demo."""
 from __future__ import annotations
 
 import argparse
@@ -29,15 +22,25 @@ CORPUS = (
     ("incident_report_template.md", "incident_report_template.txt", "report"),
 )
 
+PUBLIC_DEMO_CORPUS = (
+    ("inspection-example.txt", "fictional-p101-inspection.txt", "report"),
+    ("inspection-scan.png", "fictional-inspection-scan.png", "report"),
+    ("maintenance-corpus/refinery_process_safety_sop_demo.txt", "fictional-refinery-safety-sop.txt", "reference"),
+    ("maintenance-corpus/incident_report_grave_demo.txt", "fictional-incident-report.txt", "report"),
+)
+
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Import the local HP-800 maintenance corpus into Aegis.")
     parser.add_argument("username", help="Existing local Aegis username that will own the workspace")
-    parser.add_argument("--workspace", default="HP-800 maintenance reference", help="Workspace name to create or reuse")
+    parser.add_argument("--workspace", help="Workspace name to create or reuse")
     parser.add_argument("--db", type=Path, default=ROOT / "data" / "workbench.sqlite3")
+    parser.add_argument("--public-demo", action="store_true", help="Import only clearly labelled fictional demo files")
     args = parser.parse_args()
+    args.workspace = args.workspace or ("ARK fictional investigation" if args.public_demo else "HP-800 maintenance reference")
     db_path = args.db.resolve()
-    source_dir = ROOT / "samples" / "maintenance-corpus"
+    source_dir = ROOT / "samples" if args.public_demo else ROOT / "samples" / "maintenance-corpus"
+    corpus = PUBLIC_DEMO_CORPUS if args.public_demo else CORPUS
     if not source_dir.is_dir():
         raise SystemExit(f"Corpus folder not found: {source_dir}")
 
@@ -59,11 +62,13 @@ def main() -> int:
             workspace_id = str(uuid.uuid4())
             con.execute(
                 "INSERT INTO workspaces VALUES (?,?,?,?,?)",
-                (workspace_id, user["id"], args.workspace, "Reference corpus for HP-800 maintenance and incident testing.", int(time.time())),
+                (workspace_id, user["id"], args.workspace,
+                 "Fictional materials for public ARK evaluation." if args.public_demo else
+                 "Reference corpus for HP-800 maintenance and incident testing.", int(time.time())),
             )
         imported = 0
         skipped = 0
-        for source_name, stored_name, kind in CORPUS:
+        for source_name, stored_name, kind in corpus:
             source = source_dir / source_name
             if not source.is_file():
                 raise SystemExit(f"Missing corpus file: {source}")

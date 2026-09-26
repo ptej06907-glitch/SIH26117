@@ -9,12 +9,13 @@ sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from backend import vault
 
 def migrate(root):
-    for port in (8765,8766,8767):
+    root=Path(root).resolve()
+    ports=(8766,8767) if root.name=='demo-data' else (8765,)
+    for port in ports:
         with socket.socket() as probe:
             probe.settimeout(1)
             if probe.connect_ex(('127.0.0.1',port))==0:
                 raise RuntimeError(f'Stop the application on port {port} before migration.')
-    root=Path(root).resolve()
     path=root/'workbench.sqlite3'
     if not path.exists():raise RuntimeError('Database missing.')
     if path.read_bytes().startswith(vault.MAGIC):

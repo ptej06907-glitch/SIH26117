@@ -13,8 +13,9 @@ def choose_capability(prompt):
     return 'general', 'The request is a general writing, explanation or reasoning task.'
 
 class LocalModels:
-    def __init__(self, root):
+    def __init__(self, root, log_dir=None):
         self.root=Path(root)
+        self.log_dir=Path(log_dir) if log_dir is not None else self.root/'data/model-logs'
         self.lock=Lock()
         self.processes={}
         registry=self.root/'models/registry.json'
@@ -46,7 +47,7 @@ class LocalModels:
         with socket.socket() as reservation:
             reservation.bind(('127.0.0.1',0));port=reservation.getsockname()[1]
         key=secrets.token_urlsafe(32)
-        logs=self.root/'data/model-logs';logs.mkdir(parents=True,exist_ok=True)
+        logs=self.log_dir;logs.mkdir(parents=True,exist_ok=True)
         log=(logs/(model['id']+'.log')).open('ab')
         args=[str(executable),'-m',str(weights),'--host','127.0.0.1','--port',str(port),'-c','2048','-t','4','-np','1','--offline','--no-webui','--no-ui-mcp-proxy','--api-key',key]
         if model.get('projector'):args += ['--mmproj',str(self.root/'models'/model['projector'])]
