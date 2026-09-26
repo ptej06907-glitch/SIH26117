@@ -26,7 +26,14 @@ if not exist "demo-data\.require-antivirus" (
   pause
   exit /b 1
 )
+".venv\Scripts\python.exe" scripts\check_ollama_demo.py
+if errorlevel 1 (
+  echo Start Ollama or import the local demo models before publishing ARK.
+  pause
+  exit /b 1
+)
 set "ARK_PUBLIC_DEMO_ORIGIN=%~1"
+set "ARK_LOCAL_MODEL_RUNTIME=ollama"
 echo Public synthetic demo starting on local port 8766.
 echo Keep this window open while judges may use the link.
 ".venv\Scripts\python.exe" -m uvicorn backend.app:app --host 127.0.0.1 --port 8766 --workers 1

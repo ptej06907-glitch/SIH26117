@@ -66,6 +66,11 @@ class LocalModels:
                 time.sleep(.25)
         process.terminate()
         raise ModelUnavailable('The local model did not become ready. Check its local log and available memory.')
+    def completion_payload(self,model,system,content):
+        return {'messages':[{'role':'system','content':system},{'role':'user','content':content}],
+                'max_tokens':384,'temperature':0.2,'stream':False,'cache_prompt':False}
+    def completion_headers(self,key):
+        return {'Authorization':'Bearer '+key}
     def generate(self,prompt,context=None,image=None):
         if not self.lock.acquire(blocking=False):raise ModelBusy('Another local request is running. Please try again when it finishes.')
         started=time.monotonic()
@@ -84,7 +89,7 @@ class LocalModels:
             if capability=='coding':system+=' Provide code as text and explain it briefly. Never claim to have executed or verified it.'
             try:
                 with httpx.Client(trust_env=False,timeout=httpx.Timeout(180,connect=3)) as client:
-                    response=client.post(f'http://127.0.0.1:{port}/v1/chat/completions',headers={'Authorization':'Bearer '+key},json={'messages':[{'role':'system','content':system},{'role':'user','content':content}],'max_tokens':384,'temperature':0.2,'stream':False,'cache_prompt':False})
+                    response=client.post(f'http://127.0.0.1:{port}/v1/chat/completions',headers=self.completion_headers(key),json=self.completion_payload(model,system,content))
                     response.raise_for_status();body=response.json()
                 answer=body['choices'][0]['message']['content']
                 if not isinstance(answer,str) or not answer.strip():raise ValueError('Empty answer')
@@ -92,3 +97,33 @@ class LocalModels:
             except (httpx.HTTPError,KeyError,ValueError,IndexError):
                 raise ModelUnavailable('The local model could not complete this request. Try a shorter prompt; no cloud fallback was used.')
         finally:self.lock.release()
+
+class OllamaLocalModels(LocalModels):
+    """Use only a loopback Ollama service and explicitly imported local models."""
+    PORT=11434
+    def _tags(self):
+        try:
+            with httpx.Client(trust_env=False,timeout=3) as client:
+                response=client.get(f'http://127.0.0.1:{self.PORT}/api/tags')
+                response.raise_for_status()
+                return {entry['name'] for entry in response.json()['models']}
+        except (httpx.HTTPError,KeyError,ValueError,TypeError):
+            return set()
+    @staticmethod
+    def _name(model):
+        return 'ark-demo-'+model['id']+':latest'
+    def status(self):
+        tags=self._tags()
+        return [{'id':m['id'],'name':m['name'],'capability':m['capability'],
+                 'status':'installed' if self._name(m) in tags else 'not_installed'}
+                for m in self.models]
+    def start(self,model):
+        if self._name(model) not in self._tags():
+            raise ModelUnavailable('This model is not available in the local Ollama runtime.')
+        return self.PORT,''
+    def completion_headers(self,key):
+        return {}
+    def completion_payload(self,model,system,content):
+        payload=super().completion_payload(model,system,content)
+        payload['model']=self._name(model)
+        return payload

@@ -30,14 +30,15 @@ Use this route instead of the Azure VM. Funnel publishes a **separate synthetic-
 ## 2. Obtain and enable the public URL
 
 1. In PowerShell, run `tailscale funnel --bg 8766`. The Tailscale authorization page may ask you to enable Funnel. This exposes **only local port 8766**, not setup port 8767 or private port 8765.
-2. Copy the exact `https://...ts.net` URL shown by Tailscale. In the project directory, launch the public server using that origin:
+2. Keep the signed [Ollama Windows app](https://ollama.com/download/windows) running locally. Import the bundled GGUF weights once with `.\.venv\Scripts\python.exe scripts\import_ollama_demo_models.py`. The general, coding, and vision models appear as `ark-demo-general`, `ark-demo-coding`, and `ark-demo-vision`. This script uses only the loopback service and never pulls models from the cloud. ARK connects only to `127.0.0.1:11434`. The startup script checks that all three models are available and refuses to publish a partial AI demo. The Ollama service must remain bound to loopback, not a public network interface.
+3. Copy the exact `https://...ts.net` URL shown by Tailscale. In the project directory, launch the public server using that origin:
 
    ```powershell
    & '.\Start Public Demo.cmd' 'https://YOUR-HOST.YOUR-TAILNET.ts.net'
    ```
 
    The script refuses to start if the isolated demo database has not been created. Public mode requires the matching HTTPS origin, marks the site as synthetic, disables new-account registration, and uses Secure session cookies.
-3. Test the URL from a phone with Wi-Fi **off**. Sign in as the Judge account, open the seeded sources, run a grounded question and the synthetic P-101 scenario, then complete a Supervisor review. Verify the public warning and that the local private workspace is absent.
+4. Test the URL from a phone with Wi-Fi **off**. Sign in as the Judge account, open the seeded sources, run a grounded question and the synthetic P-101 scenario, then complete a Supervisor review. Verify the public warning and that the local private workspace is absent.
 
 ## 3. Keep the link working
 

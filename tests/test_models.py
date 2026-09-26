@@ -1,5 +1,5 @@
 from backend.app import create_app
-from backend.local_models import LocalModels, ModelUnavailable, ModelBusy, choose_capability
+from backend.local_models import LocalModels, OllamaLocalModels, ModelUnavailable, ModelBusy, choose_capability
 from tests.test_auth import client, register
 import pytest
 
@@ -56,3 +56,17 @@ def test_single_generation_lock(tmp_path):
     try:
         with pytest.raises(ModelBusy):engine.generate('Hello')
     finally:engine.lock.release()
+
+def test_ollama_requires_explicit_local_import_and_fixed_loopback(tmp_path,monkeypatch):
+    models=tmp_path/'models';models.mkdir()
+    (models/'registry.json').write_text('[{"id":"general","name":"General","file":"general.gguf","capability":"general"}]')
+    engine=OllamaLocalModels(tmp_path)
+    monkeypatch.setattr(engine,'_tags',lambda:set())
+    assert engine.status()[0]['status']=='not_installed'
+    with pytest.raises(ModelUnavailable):engine.generate('Hello')
+    monkeypatch.setattr(engine,'_tags',lambda:{'ark-demo-general:latest'})
+    assert engine.status()[0]['status']=='installed'
+    assert engine.start(engine.models[0])==(11434,'')
+    payload=engine.completion_payload(engine.models[0],'safe','hello')
+    assert payload['model']=='ark-demo-general:latest'
+    assert payload['messages'][0]['content']=='safe'

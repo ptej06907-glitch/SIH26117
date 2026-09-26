@@ -10,7 +10,7 @@ import time
 import uuid
 import os
 
-from backend.local_models import LocalModels, ModelUnavailable, ModelBusy
+from backend.local_models import LocalModels, OllamaLocalModels, ModelUnavailable, ModelBusy
 from backend.security import scan_upload, UnsafeUpload
 from backend import vault
 from backend.review_integrity import snapshot
@@ -166,7 +166,12 @@ def create_app(db_path=None, model_engine=None):
 
     from backend.network import Monitor
     monitor=Monitor(db_path.parent/'network-observation.json')
-    engine = model_engine or LocalModels(ROOT, db_path.parent/'model-logs')
+    if model_engine is not None:
+        engine=model_engine
+    elif os.environ.get('ARK_LOCAL_MODEL_RUNTIME','llama') == 'ollama':
+        engine=OllamaLocalModels(ROOT,db_path.parent/'model-logs')
+    else:
+        engine=LocalModels(ROOT,db_path.parent/'model-logs')
     @asynccontextmanager
     async def lifespan(application):
         monitor.start()
