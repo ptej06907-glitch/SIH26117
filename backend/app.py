@@ -634,6 +634,8 @@ def create_app(db_path=None, model_engine=None):
 
     from backend.workflows import install
     install(app,database,identity,owned_workspace,engine,db_path,upload_dir)
+    from backend.investigations import install as install_investigations
+    install_investigations(app, database, identity, owned_workspace, upload_dir)
 
     @app.get('/')
     def index():

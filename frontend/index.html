@@ -11,6 +11,8 @@
   <link rel="stylesheet" href="/assets/ark-cinematic.css">
   <script src="/assets/ark-landing.js" defer></script>
   <script src="/assets/app.js" defer></script>
+  <link rel="stylesheet" href="/assets/investigations.css">
+  <script src="/assets/investigations.js" defer></script>
 </head>
 <body>
 <div id="boot" role="status" aria-live="polite">
@@ -207,6 +209,13 @@
         <div class="mobile-tabs" role="tablist" aria-label="Workspace sections"><button class="mobile-tab active" data-tab="overview">Overview</button><button class="mobile-tab" data-tab="assistant">Assistant</button><button class="mobile-tab" data-tab="materials">Materials</button><button class="mobile-tab" data-tab="workflows">Workflows</button><button class="mobile-tab" data-tab="security">Offline</button></div>
 
         <section id="panel-overview" class="workspace-panel" data-panel="overview">
+          <section class="surface case-launcher">
+            <div class="surface-heading"><div><p class="eyebrow ink">ENGINEERING INVESTIGATION</p><h2>Evidence to approved case</h2><p>Confirm evidence, check a thickness trend, then request independent human approval.</p></div><button id="case-refresh" class="secondary" type="button">Refresh cases</button></div>
+            <p class="field-help">Bounded, deterministic workflow. Synthetic demo cases are labelled. Existing local-model and OCR tools remain available under Assistant and Materials.</p>
+            <div class="case-launch-controls"><label>Equipment tag<input id="case-tag" value="P-101" maxlength="40"></label><label>Evidence set<select id="case-scenario"><option value="conflict">Synthetic demo: conflicting readings</option><option value="ready">Synthetic demo: complete evidence</option><option value="missing">Synthetic demo: missing reading</option><option value="materials">This workspace's extracted materials</option></select></label><button id="case-create" class="primary" type="button">Start investigation</button></div>
+            <p class="field-help">For uploaded sources, each relevant page needs Equipment: P-101 and Revision: 2 on separate lines. Confirm the applicable revision manually. Read files in Materials first.</p>
+            <p id="case-error" class="error" role="alert" hidden></p><div id="case-list" class="case-list"></div>
+          </section>
           <div class="overview-grid">
             <article class="welcome-card"><p class="eyebrow">WORKSPACE OVERVIEW</p><h2>Continue your confidential work.</h2><p>Add source material, ask a grounded question, or create a review pack from an inspection report.</p><div class="quick-actions"><button class="primary jump-action" data-tab="materials">Add materials</button><button class="secondary jump-action" data-tab="assistant">Ask ARK</button></div></article>
             <div class="metric-grid">

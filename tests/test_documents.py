@@ -1,4 +1,5 @@
 from pathlib import Path
+import sqlite3
 import time,io,zipfile
 from fastapi.testclient import TestClient
 from backend.app import create_app
@@ -27,7 +28,7 @@ def wait_run(c,w):
 def test_read_grounding_workflow_and_artifact_isolation(tmp_path):
     engine=Engine();app=create_app(tmp_path/'db.sqlite3',engine)
     with client(app) as a,client(app) as b:
-        register(a);register(b,'bob')
+        register(a);reviewer_id=register(b,'bob').json()['user']['id']
         w=a.post('/api/workspaces',json={'name':'Source review'}).json()['id']
         doc=a.post(f'/api/workspaces/{w}/documents',params={'filename':'inspection.txt'},content=b'Equipment P-101 identification label damaged. Costs not provided.').json()['id']
         assert b.post(f'/api/documents/{doc}/extract').status_code==404
@@ -47,11 +48,22 @@ def test_read_grounding_workflow_and_artifact_isolation(tmp_path):
         result=wait_run(a,w)
         assert result['status']=='complete',result
         assert len(result['result']['artifacts'])==3
+        assert result['review_status']=='pending_analysis'
+        for art in result['result']['artifacts']:
+            response=a.get(f"/api/artifacts/{art['id']}/download")
+            assert response.status_code==409
+            assert b.get(f"/api/artifacts/{art['id']}/download").status_code==404
+        assert b.get(f'/api/workspaces/{w}/runs').status_code==404
+        with sqlite3.connect(tmp_path/'db.sqlite3') as con:
+            con.execute("UPDATE users SET role='supervisor' WHERE id=?",(reviewer_id,))
+        request_id=next(item['id'] for item in b.get('/api/review-requests').json()['requests'] if item['run_id']==result['id'])
+        assert b.patch(f'/api/review-requests/{request_id}',json={'action':'analyse','note':'Checked sources'}).status_code==200
+        assert a.get(f"/api/artifacts/{result['result']['artifacts'][0]['id']}/download").status_code==409
+        assert b.patch(f'/api/review-requests/{request_id}',json={'action':'approve','note':'Approved exact output'}).status_code==200
+        assert a.get(f'/api/workspaces/{w}/runs').json()['runs'][0]['review_status']=='approved'
         for art in result['result']['artifacts']:
             response=a.get(f"/api/artifacts/{art['id']}/download")
             assert response.status_code==200 and zipfile.is_zipfile(io.BytesIO(response.content))
-            assert b.get(f"/api/artifacts/{art['id']}/download").status_code==404
-        assert b.get(f'/api/workspaces/{w}/runs').status_code==404
 
 def test_export_formula_injection_and_open_formats(tmp_path):
     evidence=[{'ref':'S1','filename':'=DANGEROUS()','page':1,'text':'+payload','document_id':'test'}]

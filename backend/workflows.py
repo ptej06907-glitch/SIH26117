@@ -290,8 +290,11 @@ def install(app,database,identity,owned_workspace,engine,db_path,upload_dir):
     @app.get('/api/workspaces/{workspace_id}/runs')
     def list_runs(workspace_id:str,request:Request):
         owned_workspace(workspace_id,identity(request))
-        with database() as con:rows=con.execute('SELECT * FROM runs WHERE workspace_id=? ORDER BY created_at DESC,rowid DESC LIMIT 20',(workspace_id,)).fetchall()
-        return {'runs':[{**dict(r),'events':json.loads(r['events']),'result':json.loads(r['result'])} for r in rows]}
+        with database() as con:
+            rows=con.execute('SELECT * FROM runs WHERE workspace_id=? ORDER BY created_at DESC,rowid DESC LIMIT 20',(workspace_id,)).fetchall()
+            reviews={r['run_id']:r['status'] for r in con.execute('SELECT run_id,status FROM review_requests WHERE workspace_id=?',(workspace_id,)).fetchall()}
+        return {'runs':[{**dict(r),'events':json.loads(r['events']),'result':json.loads(r['result']),
+                         'review_status':reviews.get(r['id']) if r['kind']=='inspection' else None} for r in rows]}
 
     @app.get('/api/artifacts/{artifact_id}/download')
     def artifact(artifact_id:str,request:Request):
@@ -301,4 +304,22 @@ def install(app,database,identity,owned_workspace,engine,db_path,upload_dir):
         if not row:raise HTTPException(404,'Artifact not found.')
         path=(data/row['path']).resolve()
         if not path.is_relative_to(artifacts.resolve()) or not path.is_file():raise HTTPException(404,'Artifact unavailable.')
+        with database() as con:
+            run=con.execute('SELECT kind,status,result FROM runs WHERE id=?',(row['run_id'],)).fetchone()
+            if not run or run['status']!='complete':
+                raise HTTPException(409,'Only completed, verified output can be downloaded.')
+            if run['kind']=='inspection':
+                from backend.review_integrity import snapshot
+                review=con.execute('SELECT * FROM review_requests WHERE run_id=?',(row['run_id'],)).fetchone()
+                version=con.execute('SELECT digest FROM review_versions WHERE review_id=?',(review['id'],)).fetchone() if review else None
+                if not review or review['status']!='approved' or not version:
+                    raise HTTPException(409,'Export locked. A Supervisor must analyse and approve the exact review pack first.')
+                try:current_digest,_=snapshot(con,review,data)
+                except (ValueError,OSError):raise HTTPException(409,'Evidence or output changed. Fresh analysis and approval are required.')
+                if current_digest!=version['digest']:
+                    raise HTTPException(409,'Evidence or output changed. Fresh analysis and approval are required.')
+            elif run['kind']=='coding' and not json.loads(run['result']).get('verified'):
+                raise HTTPException(409,'Utility verification must pass before download.')
+            con.execute('INSERT INTO audit_events(user_id,action,created_at) VALUES (?,?,?)',
+                        (user['id'],f'artifact_export:{artifact_id}',int(time.time())))
         return Response(vault.read_bytes(path),headers={'Content-Disposition':"attachment; filename*=UTF-8''"+quote(row['filename'])},media_type='application/octet-stream')
