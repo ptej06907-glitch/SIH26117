@@ -10,7 +10,7 @@ The public hostname must exactly match the value of `ARK_PUBLIC_DEMO_ORIGIN`. Wh
 
 ## Prepare a clean demo VM
 
-First, the team owner needs an Azure account with an active subscription: https://azure.microsoft.com/en-us/pricing/purchase-options/azure-account . Complete Microsoft's identity and billing verification directly on Azure; do not share payment details or account passwords in chat. A free-account credit is not a promise that this Windows VM and its model workload will be free. Review the displayed VM price and set a budget alert before starting it.
+First, the team owner should start at https://azure.microsoft.com/en-us/free/ and select **Try Azure for free**, not **Pay as you go**. Check that the signup offer is the free trial (`MS-AZR-0044P`), not pay-as-you-go (`MS-AZR-0003P`), before entering card details. Complete Microsoft's identity and billing verification directly on Azure; do not share payment details or account passwords in chat. A free-account credit is not a promise that this Windows VM and its model workload will be free. Review the displayed VM price and set a budget alert before starting it.
 
 1. Choose a Windows VM with at least the memory available on the tested 24 GB development laptop, then benchmark model loading before sharing the link. VM availability and pricing depend on the region and subscription.
 2. Create a static public IP and DNS label. Record the final `https://<name>.<region>.cloudapp.azure.com` origin. Permit inbound HTTP/HTTPS for Caddy; restrict administrative access to the team. Do not permit inbound traffic to ARK's port 8765.
